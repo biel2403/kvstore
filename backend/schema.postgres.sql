@@ -38,3 +38,8 @@ CREATE TABLE IF NOT EXISTS order_items (
   quantity INTEGER NOT NULL,
   total NUMERIC(10, 2) NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS store_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);

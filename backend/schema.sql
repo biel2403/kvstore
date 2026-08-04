@@ -39,3 +39,8 @@ CREATE TABLE IF NOT EXISTS order_items (
   total REAL NOT NULL,
   FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS store_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);

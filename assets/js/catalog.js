@@ -107,6 +107,9 @@ window.saveAdminProducts = function saveAdminProducts(products) {
 };
 
 window.getStoreProducts = function getStoreProducts() {
+  try {
+    if (localStorage.getItem("kvHideDemoProducts") === "true") return window.getAdminProducts();
+  } catch (error) {}
   return [...window.STORE_PRODUCTS, ...window.getAdminProducts()];
 };
 

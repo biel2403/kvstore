@@ -71,6 +71,43 @@ async function pgQuery(sql, params = []) {
   return result.rows;
 }
 
+async function getSetting(key, defaultValue = "") {
+  if (USE_POSTGRES) {
+    const rows = await pgQuery("SELECT value FROM store_settings WHERE key = $1;", [key]);
+    return rows[0]?.value ?? defaultValue;
+  }
+
+  const rows = query(`SELECT value FROM store_settings WHERE key = ${sqlValue(key)};`);
+  return rows[0]?.value ?? defaultValue;
+}
+
+async function setSetting(key, value) {
+  if (USE_POSTGRES) {
+    await pgQuery(`
+      INSERT INTO store_settings (key, value)
+      VALUES ($1, $2)
+      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+    `, [key, String(value)]);
+    return;
+  }
+
+  execute(`
+    INSERT OR REPLACE INTO store_settings (key, value)
+    VALUES (${sqlValue(key)}, ${sqlValue(String(value))});
+  `);
+}
+
+async function readStoreSettings() {
+  const hideDemoProducts = (await getSetting("hideDemoProducts", "false")) === "true";
+  return { hideDemoProducts };
+}
+
+async function updateStoreSettings(payload) {
+  const hideDemoProducts = Boolean(payload.hideDemoProducts);
+  await setSetting("hideDemoProducts", String(hideDemoProducts));
+  return readStoreSettings();
+}
+
 function productFromRow(row) {
   const product = {
     id: Number(row.id),
@@ -479,7 +516,9 @@ function readBaseProducts() {
 }
 
 async function allProducts() {
-  return [...readBaseProducts(), ...(await readAdminProducts())];
+  const settings = await readStoreSettings();
+  const baseProducts = settings.hideDemoProducts ? [] : readBaseProducts();
+  return [...baseProducts, ...(await readAdminProducts())];
 }
 
 function sendJson(res, status, payload) {
@@ -613,6 +652,16 @@ async function handleApi(req, res, url) {
   if (req.method === "GET" && url.pathname === "/api/sales-summary") {
     if (!requireAdmin(req, res)) return;
     return sendJson(res, 200, await salesSummary());
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/settings") {
+    if (!requireAdmin(req, res)) return;
+    return sendJson(res, 200, await readStoreSettings());
+  }
+
+  if (req.method === "PATCH" && url.pathname === "/api/settings") {
+    if (!requireAdmin(req, res)) return;
+    return sendJson(res, 200, await updateStoreSettings(await parseBody(req)));
   }
 
   if (req.method === "POST" && url.pathname === "/api/products") {

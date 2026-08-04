@@ -20,6 +20,7 @@ O projeto ja tem:
 - Tela admin para ver pedidos.
 - Alteracao de status de pedido no admin.
 - Tela admin para criar anuncio de produto.
+- Opcao no admin para ocultar/mostrar anuncios ficticios da vitrine.
 - Upload/preview de foto no admin.
 - Login no admin.
 - Protecao das rotas administrativas no backend.
@@ -451,6 +452,8 @@ GET    /api/orders
 POST   /api/orders
 PATCH  /api/orders/:id
 GET    /api/sales-summary
+GET    /api/settings
+PATCH  /api/settings
 ```
 
 As rotas administrativas exigem token de login.

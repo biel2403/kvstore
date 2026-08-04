@@ -13,6 +13,7 @@ const productCount = document.querySelector("#adminProductCount");
 const ordersList = document.querySelector("#adminOrdersList");
 const orderCount = document.querySelector("#adminOrderCount");
 const clearButton = document.querySelector("#clearAdminProducts");
+const toggleDemoProductsButton = document.querySelector("#toggleDemoProducts");
 const editingProductId = document.querySelector("#editingProductId");
 const productSubmitButton = document.querySelector("#productSubmitButton");
 const cancelEditButton = document.querySelector("#cancelEditButton");
@@ -28,6 +29,7 @@ const money = new Intl.NumberFormat("pt-BR", {
 });
 
 let selectedImage = "";
+let storeSettings = { hideDemoProducts: false };
 
 function getToken() {
   return localStorage.getItem("kvAdminToken") || "";
@@ -115,6 +117,34 @@ async function clearAdminProductList() {
   }
 
   await fetch(window.kvApiUrl("/api/admin-products"), { method: "DELETE", headers: authHeaders() });
+}
+
+async function loadStoreSettings() {
+  if (!hasBackend()) {
+    return {
+      hideDemoProducts: localStorage.getItem("kvHideDemoProducts") === "true"
+    };
+  }
+
+  const response = await fetch(window.kvApiUrl("/api/settings"), { headers: authHeaders() });
+  if (!response.ok) throw new Error("Nao foi possivel carregar as configuracoes.");
+  return response.json();
+}
+
+async function saveStoreSettings(settings) {
+  if (!hasBackend()) {
+    localStorage.setItem("kvHideDemoProducts", String(Boolean(settings.hideDemoProducts)));
+    return settings;
+  }
+
+  const response = await fetch(window.kvApiUrl("/api/settings"), {
+    method: "PATCH",
+    headers: authHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(settings)
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Nao foi possivel salvar as configuracoes.");
+  return data;
 }
 
 async function loadOrders() {
@@ -248,6 +278,12 @@ async function renderDashboard() {
     .join("");
 }
 
+function renderStoreSettings() {
+  toggleDemoProductsButton.textContent = storeSettings.hideDemoProducts
+    ? "Mostrar anuncios ficticios"
+    : "Ocultar anuncios ficticios";
+}
+
 async function renderOrders() {
   const orders = await loadOrders();
   orderCount.textContent = orders.length;
@@ -374,6 +410,20 @@ clearButton.addEventListener("click", async () => {
   adminMessage.textContent = "Anuncios criados foram removidos.";
 });
 
+toggleDemoProductsButton.addEventListener("click", async () => {
+  try {
+    storeSettings = await saveStoreSettings({
+      hideDemoProducts: !storeSettings.hideDemoProducts
+    });
+    renderStoreSettings();
+    adminMessage.textContent = storeSettings.hideDemoProducts
+      ? "Anuncios ficticios ocultados da loja."
+      : "Anuncios ficticios voltaram para a loja.";
+  } catch (error) {
+    adminMessage.textContent = error.message;
+  }
+});
+
 ordersList.addEventListener("change", async event => {
   const select = event.target.closest("[data-order-status]");
   if (!select) return;
@@ -416,6 +466,8 @@ logoutButton.addEventListener("click", () => {
 
 async function bootAdmin() {
   try {
+    storeSettings = await loadStoreSettings();
+    renderStoreSettings();
     await renderDashboard();
     await renderAdminProducts();
     await renderOrders();
