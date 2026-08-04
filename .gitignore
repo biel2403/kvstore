@@ -1,0 +1,6 @@
+node_modules/
+.env
+.env.*
+backend/store.sqlite
+backend/db.json
+*.log

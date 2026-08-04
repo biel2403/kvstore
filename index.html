@@ -1,0 +1,224 @@
+﻿<!--
+  COMO PERSONALIZAR ESTE SITE
+  1. Nome da loja: procure por "Vasconcelos" neste arquivo.
+  2. Produtos, precos, categorias e imagens: edite assets/js/catalog.js.
+  3. Cores, fontes e espacamentos: edite assets/css/style.css.
+  4. Imagens: substitua as URLs do Unsplash por fotos reais dos seus produtos.
+  5. Para abrir: clique duas vezes neste index.html ou abra a pasta em um servidor local.
+-->
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="E-commerce moderno e responsivo para loja de roupas.">
+    <title>Vasconcelos | Moda online</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <a class="logo" href="#inicio" aria-label="Vasconcelos">
+        <img class="logo-image" src="assets/img/vasconcelos-logo.png" alt="">
+        <span>KV Store</span>
+      </a>
+
+      <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="main-nav" aria-label="Menu principal">
+        <a href="#inicio">In&iacute;cio</a>
+        <a href="pages/categoria.html?category=Feminina">Feminina</a>
+        <a href="pages/categoria.html?category=Calcados">Cal&ccedil;ados</a>
+        <a href="#promocoes">Promo&ccedil;&otilde;es</a>
+        <a href="pages/contato.html">Contato</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="icon-btn" id="searchButton" type="button" aria-label="Buscar produtos">&#128269;</button>
+        <button class="icon-btn cart-btn" id="openCart" type="button" aria-label="Abrir carrinho">
+          &#128722;
+          <span id="cartCount">0</span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="inicio">
+        <div class="hero-content fade-in">
+          <p class="eyebrow">Boutique feminina e cal&ccedil;ados</p>
+          <h1>Nova cole&ccedil;&atilde;o dispon&iacute;vel</h1>
+          <p>Pe&ccedil;as elegantes, tons sofisticados e escolhas vers&aacute;teis para vestir sua rotina com presen&ccedil;a.</p>
+          <a class="btn btn-primary" href="#produtos">Comprar agora</a>
+        </div>
+      </section>
+
+      <section class="section categories" aria-labelledby="categorias-title">
+        <div class="section-heading">
+          <p class="eyebrow">KV</p>
+          <h2 id="categorias-title">Categorias</h2>
+        </div>
+
+        <div class="category-grid">
+          <a class="category-card" id="feminino" href="pages/categoria.html?category=Feminina">
+            <img src="https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=900&q=80" alt="Moda feminina">
+            <span>Feminina</span>
+          </a>
+          <a class="category-card" href="pages/categoria.html?category=Calcados">
+            <img src="https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=900&q=80" alt="Calcados femininos">
+            <span>Cal&ccedil;ados</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="section shop-section" id="produtos" aria-labelledby="produtos-title">
+        <div class="section-heading shop-heading">
+          <div>
+            <p class="eyebrow">Vitrine</p>
+            <h2 id="produtos-title">Produtos</h2>
+          </div>
+
+          <div class="filters" aria-label="Filtros de produtos">
+            <label>
+              Categoria
+              <select id="categoryFilter">
+                <option value="Todos">Todos</option>
+                <option value="Feminina">Feminina</option>
+                <option value="Calcados">Cal&ccedil;ados</option>
+              </select>
+            </label>
+
+            <label>
+              Pre&ccedil;o
+              <select id="priceFilter">
+                <option value="Todos">Todos</option>
+                <option value="0-100">At&eacute; R$100</option>
+                <option value="100-200">R$100 a R$200</option>
+                <option value="200-9999">Acima de R$200</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="search-panel" id="searchPanel">
+          <input id="searchInput" type="search" placeholder="Buscar camiseta, cal&ccedil;a, bolsa..." aria-label="Buscar produtos">
+        </div>
+
+        <div class="product-grid" id="productGrid" aria-live="polite"></div>
+      </section>
+
+      <section class="section sale-section" id="promocoes" aria-labelledby="sale-title">
+        <div class="section-heading">
+          <p class="eyebrow">Ofertas da semana</p>
+          <h2 id="sale-title">Produtos em promo&ccedil;&atilde;o</h2>
+        </div>
+        <div class="product-grid compact-grid" id="saleGrid"></div>
+      </section>
+
+      <section class="newsletter" aria-labelledby="newsletter-title">
+        <div>
+          <p class="eyebrow">Clube Vasconcelos</p>
+          <h2 id="newsletter-title">Receba lan&ccedil;amentos, promo&ccedil;&otilde;es e novidades da cole&ccedil;&atilde;o.</h2>
+        </div>
+        <form class="newsletter-form" id="newsletterForm">
+          <input type="email" id="newsletterEmail" placeholder="seu@email.com" required aria-label="Seu email">
+          <button class="btn btn-dark" type="submit">Cadastrar</button>
+          <p class="form-message" id="newsletterMessage" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+    <aside class="cart-sidebar" id="cartSidebar" aria-label="Carrinho de compras" aria-hidden="true">
+      <div class="cart-header">
+        <div>
+          <p class="eyebrow">Sua compra</p>
+          <h2>Carrinho</h2>
+        </div>
+        <button class="icon-btn" id="closeCart" type="button" aria-label="Fechar carrinho">x</button>
+      </div>
+      <div class="cart-items" id="cartItems"></div>
+      <div class="cart-footer">
+        <div class="cart-total">
+          <span>Total</span>
+          <strong id="cartTotal">R$ 0,00</strong>
+        </div>
+        <form class="checkout-form" id="checkoutForm">
+          <label>
+            Nome completo
+            <input name="name" required autocomplete="name">
+          </label>
+          <label>
+            WhatsApp
+            <input name="phone" required autocomplete="tel">
+          </label>
+          <label>
+            Email
+            <input name="email" type="email" autocomplete="email">
+          </label>
+          <label>
+            Endereco
+            <textarea name="address" rows="3" placeholder="Rua, numero, bairro, cidade"></textarea>
+          </label>
+          <div class="form-grid compact-form-grid">
+            <label>
+              Entrega
+              <select name="deliveryMethod">
+                <option>Entrega</option>
+                <option>Retirada</option>
+              </select>
+            </label>
+            <label>
+              Pagamento
+              <select name="paymentMethod">
+                <option>Pix</option>
+                <option>Cartao</option>
+                <option>Dinheiro</option>
+              </select>
+            </label>
+          </div>
+          <button class="btn btn-primary full-width whatsapp-checkout-btn" type="submit">Finalizar pelo WhatsApp</button>
+          <p class="form-message checkout-message" id="checkoutMessage" role="status"></p>
+        </form>
+      </div>
+    </aside>
+    <div class="overlay" id="overlay"></div>
+
+    <footer class="footer" id="contato">
+      <div>
+        <a class="logo" href="#inicio">
+          <img class="logo-image" src="assets/img/vasconcelos-logo.png" alt="">
+          <span>Vasconcelos</span>
+        </a>
+        <p>Moda online com identidade boutique, atendimento pr&oacute;ximo e pe&ccedil;as selecionadas.</p>
+      </div>
+      <div>
+        <h3>Links &uacute;teis</h3>
+        <a href="#produtos">Produtos</a>
+        <a href="#promocoes">Promo&ccedil;&otilde;es</a>
+        <a href="pages/contato.html">Contato</a>
+        <a href="pages/trocas.html">Trocas e devolu&ccedil;&otilde;es</a>
+      </div>
+      <div>
+        <h3>Redes sociais</h3>
+        <a href="#">Instagram</a>
+        <a href="#">TikTok</a>
+        <a href="#">Facebook</a>
+      </div>
+      <div>
+        <h3>Contato</h3>
+        <a href="mailto:contato@vasconcelos.com">contato@vasconcelos.com</a>
+        <a href="tel:+5500000000000">(00) 00000-0000</a>
+      </div>
+      <p class="copyright">&copy; 2026 Vasconcelos. Todos os direitos reservados.</p>
+    </footer>
+
+    <button class="back-to-top" id="backToTop" type="button" aria-label="Voltar ao topo">&uarr;</button>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/catalog.js"></script>
+    <script src="assets/js/script.js"></script>
+    <script src="assets/js/checkout.js"></script>
+  </body>
+</html>

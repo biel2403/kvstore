@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin | Atelier Nove</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark">A9</span>
+        <span>Admin</span>
+      </a>
+      <nav class="nav">
+        <a href="/">Loja</a>
+        <a href="#produtos">Produtos</a>
+        <a href="#pedidos">Pedidos</a>
+      </nav>
+    </header>
+
+    <main class="admin-main">
+      <section class="section admin-dashboard">
+        <div class="metric"><span>Produtos</span><strong id="productMetric">0</strong></div>
+        <div class="metric"><span>Pedidos</span><strong id="orderMetric">0</strong></div>
+        <div class="metric"><span>Faturamento</span><strong id="revenueMetric">R$ 0,00</strong></div>
+      </section>
+
+      <section id="produtos" class="section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Catalogo</p>
+            <h1>Produtos</h1>
+          </div>
+        </div>
+        <form id="productForm" class="admin-form">
+          <input name="name" placeholder="Nome" required>
+          <input name="category" placeholder="Categoria" required>
+          <input name="price" type="number" step="0.01" min="0" placeholder="Preco" required>
+          <input name="image" placeholder="URL da foto">
+          <input name="colors" placeholder="Cores separadas por virgula">
+          <input name="sizes" placeholder="Tamanhos separados por virgula">
+          <textarea name="description" rows="2" placeholder="Descricao"></textarea>
+          <button class="primary-button" type="submit">Salvar produto</button>
+        </form>
+        <div id="adminProducts" class="admin-list"></div>
+      </section>
+
+      <section id="pedidos" class="section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Operacao</p>
+            <h2>Pedidos</h2>
+          </div>
+        </div>
+        <div id="adminOrders" class="admin-list"></div>
+      </section>
+    </main>
+
+    <script src="/admin.js"></script>
+  </body>
+</html>

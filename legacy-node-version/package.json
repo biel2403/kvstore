@@ -1,0 +1,16 @@
+{
+  "name": "loja-roupas-online",
+  "version": "1.0.0",
+  "description": "Loja de roupas online com vitrine, carrinho, checkout e painel administrativo.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "loja",
+    "roupas",
+    "ecommerce"
+  ],
+  "author": "",
+  "license": "MIT"
+}

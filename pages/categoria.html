@@ -1,0 +1,97 @@
+<!--
+  PAGINA DA CATEGORIA
+  - O filtro vem da URL: categoria.html?category=Feminina
+  - Para alterar categorias, edite os produtos em ../assets/js/catalog.js.
+-->
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Categoria | Vasconcelos</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="logo" href="../index.html#inicio" aria-label="Vasconcelos">
+        <img class="logo-image" src="../assets/img/vasconcelos-logo.png" alt="">
+        <span>Vasconcelos</span>
+      </a>
+      <nav class="main-nav product-nav" aria-label="Menu principal">
+        <a href="../index.html">Inicio</a>
+        <a href="categoria.html?category=Feminina">Feminina</a>
+        <a href="categoria.html?category=Calcados">Cal&ccedil;ados</a>
+        <a href="../index.html#promocoes">Promocoes</a>
+        <a href="../index.html#contato">Contato</a>
+      </nav>
+      <button class="icon-btn cart-btn" id="openCart" type="button" aria-label="Abrir carrinho">
+        &#128722;
+        <span id="cartCount">0</span>
+      </button>
+    </header>
+
+    <main>
+      <section class="category-hero">
+        <p class="eyebrow">Categoria</p>
+        <h1 id="categoryTitle">Produtos</h1>
+        <p id="categorySubtitle">Veja os produtos selecionados desta categoria.</p>
+      </section>
+
+      <section class="section shop-section">
+        <div class="section-heading shop-heading">
+          <div>
+            <p class="eyebrow">Vitrine filtrada</p>
+            <h2 id="categoryCount">Produtos</h2>
+          </div>
+          <div class="filters">
+            <label>
+              Preco
+              <select id="priceFilter">
+                <option value="Todos">Todos</option>
+                <option value="0-100">Ate R$100</option>
+                <option value="100-200">R$100 a R$200</option>
+                <option value="200-9999">Acima de R$200</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <div class="product-grid" id="categoryGrid"></div>
+      </section>
+    </main>
+
+    <aside class="cart-sidebar" id="cartSidebar" aria-label="Carrinho de compras" aria-hidden="true">
+      <div class="cart-header">
+        <div>
+          <p class="eyebrow">Sua compra</p>
+          <h2>Carrinho</h2>
+        </div>
+        <button class="icon-btn" id="closeCart" type="button" aria-label="Fechar carrinho">x</button>
+      </div>
+      <div class="cart-items" id="cartItems"></div>
+      <div class="cart-footer">
+        <div class="cart-total">
+          <span>Total</span>
+          <strong id="cartTotal">R$ 0,00</strong>
+        </div>
+        <form class="checkout-form" id="checkoutForm">
+          <label>Nome completo <input name="name" required autocomplete="name"></label>
+          <label>WhatsApp <input name="phone" required autocomplete="tel"></label>
+          <label>Email <input name="email" type="email" autocomplete="email"></label>
+          <label>Endereco <textarea name="address" rows="3"></textarea></label>
+          <div class="form-grid compact-form-grid">
+            <label>Entrega <select name="deliveryMethod"><option>Entrega</option><option>Retirada</option></select></label>
+            <label>Pagamento <select name="paymentMethod"><option>Pix</option><option>Cartao</option><option>Dinheiro</option></select></label>
+          </div>
+          <button class="btn btn-primary full-width whatsapp-checkout-btn" type="submit">Finalizar pelo WhatsApp</button>
+          <p class="form-message checkout-message" id="checkoutMessage" role="status"></p>
+        </form>
+      </div>
+    </aside>
+    <div class="overlay" id="overlay"></div>
+
+    <script src="../assets/js/config.js"></script>
+    <script src="../assets/js/catalog.js"></script>
+    <script src="../assets/js/categoria.js"></script>
+    <script src="../assets/js/checkout.js"></script>
+  </body>
+</html>

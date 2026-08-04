@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Atelier Nove | Loja de roupas</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#home" aria-label="Atelier Nove">
+        <span class="brand-mark">A9</span>
+        <span>Atelier Nove</span>
+      </a>
+      <nav class="nav">
+        <a href="#produtos">Produtos</a>
+        <a href="#checkout">Checkout</a>
+        <a href="/admin.html">Admin</a>
+      </nav>
+      <button class="icon-button cart-toggle" type="button" aria-label="Abrir carrinho">
+        <span>🛒</span>
+        <strong id="cartCount">0</strong>
+      </button>
+    </header>
+
+    <main>
+      <section id="home" class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Nova colecao</p>
+          <h1>Atelier Nove</h1>
+          <p>Pecas escolhidas para vestir o cotidiano com conforto, presenca e um acabamento que aparece nos detalhes.</p>
+          <a class="primary-link" href="#produtos">Ver produtos</a>
+        </div>
+      </section>
+
+      <section id="produtos" class="section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Vitrine</p>
+            <h2>Produtos</h2>
+          </div>
+          <div class="filters">
+            <input id="searchInput" type="search" placeholder="Buscar roupa">
+            <select id="categoryFilter" aria-label="Filtrar categoria">
+              <option value="">Todas</option>
+            </select>
+          </div>
+        </div>
+        <div id="productGrid" class="product-grid" aria-live="polite"></div>
+      </section>
+
+      <section id="checkout" class="checkout section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Pedido</p>
+            <h2>Finalizar compra</h2>
+          </div>
+        </div>
+        <div class="checkout-layout">
+          <form id="checkoutForm" class="checkout-form">
+            <label>Nome completo
+              <input name="name" required autocomplete="name">
+            </label>
+            <label>Telefone / WhatsApp
+              <input name="phone" required autocomplete="tel">
+            </label>
+            <label>E-mail
+              <input name="email" type="email" autocomplete="email">
+            </label>
+            <label>Endereco
+              <textarea name="address" rows="3" placeholder="Rua, numero, bairro, cidade"></textarea>
+            </label>
+            <div class="form-row">
+              <label>Pagamento
+                <select name="paymentMethod">
+                  <option>Pix</option>
+                  <option>Cartao</option>
+                  <option>Dinheiro na entrega</option>
+                </select>
+              </label>
+              <label>Entrega
+                <select name="deliveryMethod">
+                  <option>Entrega</option>
+                  <option>Retirada na loja</option>
+                </select>
+              </label>
+            </div>
+            <button class="primary-button" type="submit">Enviar pedido</button>
+            <p id="checkoutMessage" class="message" role="status"></p>
+          </form>
+          <aside class="order-summary">
+            <h3>Carrinho</h3>
+            <div id="cartItems"></div>
+            <dl>
+              <div><dt>Subtotal</dt><dd id="subtotal">R$ 0,00</dd></div>
+              <div><dt>Frete</dt><dd id="shipping">R$ 0,00</dd></div>
+              <div class="total"><dt>Total</dt><dd id="total">R$ 0,00</dd></div>
+            </dl>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

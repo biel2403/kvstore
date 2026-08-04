@@ -1,0 +1,19 @@
+{
+  "name": "kv-store-backend",
+  "version": "1.0.0",
+  "description": "Backend Node com PostgreSQL e fallback SQLite para a loja KV Store.",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js"
+  },
+  "keywords": [
+    "ecommerce",
+    "node",
+    "loja"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^8.22.0"
+  }
+}

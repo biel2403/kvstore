@@ -1,0 +1,181 @@
+<!--
+  ADMIN DA LOJA
+  - Esta tela cria anuncios de produto sem backend.
+  - Os produtos cadastrados ficam salvos no navegador usando localStorage.
+  - Para uma loja real, esta parte futuramente deve ir para um banco de dados.
+-->
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin | Vasconcelos</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="logo" href="../index.html#inicio" aria-label="Vasconcelos">
+        <img class="logo-image" src="../assets/img/vasconcelos-logo.png" alt="">
+        <span>Admin KV</span>
+      </a>
+      <nav class="main-nav product-nav" aria-label="Menu principal">
+        <a href="../index.html">Loja</a>
+        <a href="categoria.html?category=Feminina">Feminina</a>
+        <a href="categoria.html?category=Calcados">Cal&ccedil;ados</a>
+        <button class="small-text-button" id="logoutButton" type="button">Sair</button>
+      </nav>
+    </header>
+
+    <section class="login-panel" id="loginPanel">
+      <form class="admin-form login-form" id="loginForm">
+        <p class="eyebrow">Acesso restrito</p>
+        <h1>Entrar no admin</h1>
+        <label>
+          Usuario
+          <input name="user" autocomplete="username" required value="admin">
+        </label>
+        <label>
+          Senha
+          <input name="password" type="password" autocomplete="current-password" required value="1234">
+        </label>
+        <button class="btn btn-primary full-width" type="submit">Entrar</button>
+        <p class="form-message admin-message" id="loginMessage" role="status"></p>
+      </form>
+    </section>
+
+    <main class="admin-page is-hidden" id="adminApp">
+      <section class="admin-hero">
+        <p class="eyebrow">Painel administrativo</p>
+        <h1>Painel de controle de vendas</h1>
+        <p>Acompanhe vendas, pedidos, faturamento e cadastre produtos da loja.</p>
+      </section>
+
+      <section class="dashboard-grid">
+        <div class="metric">
+          <span>Faturamento total</span>
+          <strong id="dashboardRevenue">R$ 0,00</strong>
+        </div>
+        <div class="metric">
+          <span>Receita paga</span>
+          <strong id="dashboardPaidRevenue">R$ 0,00</strong>
+        </div>
+        <div class="metric">
+          <span>Ticket medio</span>
+          <strong id="dashboardAverageTicket">R$ 0,00</strong>
+        </div>
+        <div class="metric">
+          <span>Pedidos ativos</span>
+          <strong id="dashboardActiveOrders">0</strong>
+        </div>
+      </section>
+
+      <section class="admin-layout">
+        <form class="admin-form" id="adminProductForm">
+          <input type="hidden" name="editingId" id="editingProductId">
+          <div class="form-grid">
+            <label>
+              Nome do produto
+              <input name="name" id="adminName" placeholder="Ex: Vestido Floral" required>
+            </label>
+
+            <label>
+              Categoria
+              <select name="category" id="adminCategory" required>
+                <option value="Feminina">Feminina</option>
+                <option value="Calcados">Cal&ccedil;ados</option>
+              </select>
+            </label>
+
+            <label>
+              Preco
+              <input name="price" id="adminPrice" type="number" min="0" step="0.01" placeholder="149.90" required>
+            </label>
+
+            <label>
+              Preco antigo
+              <input name="oldPrice" id="adminOldPrice" type="number" min="0" step="0.01" placeholder="Opcional">
+            </label>
+
+            <label>
+              Estoque
+              <input name="stock" id="adminStock" type="number" min="0" step="1" placeholder="10" value="0">
+            </label>
+
+            <label>
+              Tamanhos
+              <input name="sizes" id="adminSizes" placeholder="P, M, G ou 34, 35, 36">
+            </label>
+
+            <label>
+              Cores
+              <input name="colors" id="adminColors" placeholder="Preto, Nude, Branco">
+            </label>
+
+            <label class="checkbox-label">
+              <input name="sale" id="adminSale" type="checkbox">
+              Marcar como promocao
+            </label>
+          </div>
+
+          <label>
+            Descricao do produto
+            <textarea name="description" id="adminDescription" rows="4" placeholder="Descreva tecido, estilo, ocasiao de uso..." required></textarea>
+          </label>
+
+          <div class="image-admin-grid">
+            <label>
+              Foto do produto
+              <input name="imageFile" id="adminImageFile" type="file" accept="image/*">
+            </label>
+
+            <label>
+              Ou URL da imagem
+              <input name="imageUrl" id="adminImageUrl" type="url" placeholder="https://...">
+            </label>
+          </div>
+
+          <div class="image-preview" id="imagePreview">
+            <span>Preview da foto</span>
+          </div>
+
+          <button class="btn btn-primary full-width" type="submit" id="productSubmitButton">Criar anuncio</button>
+          <button class="btn btn-dark full-width is-hidden" id="cancelEditButton" type="button">Cancelar edicao</button>
+          <p class="form-message admin-message" id="adminMessage" role="status"></p>
+        </form>
+
+        <aside class="admin-side">
+          <div class="metric">
+            <span>Anuncios criados</span>
+            <strong id="adminProductCount">0</strong>
+          </div>
+          <div class="metric">
+            <span>Pedidos recebidos</span>
+            <strong id="adminOrderCount">0</strong>
+          </div>
+          <div class="status-summary" id="statusSummary"></div>
+          <button class="btn btn-dark full-width" id="clearAdminProducts" type="button">Limpar anuncios criados</button>
+        </aside>
+      </section>
+
+      <section class="section admin-products-section">
+        <div class="section-heading">
+          <p class="eyebrow">Seus anuncios</p>
+          <h2>Produtos cadastrados</h2>
+        </div>
+        <div class="admin-products-list" id="adminProductsList"></div>
+      </section>
+
+      <section class="section admin-products-section">
+        <div class="section-heading">
+          <p class="eyebrow">Pedidos</p>
+          <h2>Pedidos recebidos</h2>
+        </div>
+        <div class="admin-products-list" id="adminOrdersList"></div>
+      </section>
+    </main>
+
+    <script src="../assets/js/config.js"></script>
+    <script src="../assets/js/catalog.js"></script>
+    <script src="../assets/js/admin.js"></script>
+  </body>
+</html>

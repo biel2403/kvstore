@@ -1,0 +1,91 @@
+{
+  "products": [
+    {
+      "id": "camiseta-minimal",
+      "name": "Camiseta Minimal",
+      "category": "Camisetas",
+      "price": 79.9,
+      "description": "Camiseta de algodao premium com caimento leve para uso diario.",
+      "image": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80",
+      "colors": ["Branco", "Preto", "Areia"],
+      "sizes": ["P", "M", "G", "GG"],
+      "stock": {
+        "Branco|P": 8,
+        "Branco|M": 10,
+        "Branco|G": 6,
+        "Branco|GG": 3,
+        "Preto|P": 5,
+        "Preto|M": 9,
+        "Preto|G": 7,
+        "Preto|GG": 2,
+        "Areia|P": 4,
+        "Areia|M": 6,
+        "Areia|G": 3,
+        "Areia|GG": 1
+      },
+      "featured": true
+    },
+    {
+      "id": "jaqueta-urbana",
+      "name": "Jaqueta Urbana",
+      "category": "Jaquetas",
+      "price": 229.9,
+      "description": "Jaqueta versatil com textura encorpada e bolsos frontais.",
+      "image": "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=900&q=80",
+      "colors": ["Verde", "Preto"],
+      "sizes": ["P", "M", "G"],
+      "stock": {
+        "Verde|P": 2,
+        "Verde|M": 5,
+        "Verde|G": 3,
+        "Preto|P": 2,
+        "Preto|M": 4,
+        "Preto|G": 2
+      },
+      "featured": true
+    },
+    {
+      "id": "calca-wide",
+      "name": "Calca Wide",
+      "category": "Calcas",
+      "price": 159.9,
+      "description": "Calca ampla em sarja macia, feita para conforto e presenca.",
+      "image": "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=900&q=80",
+      "colors": ["Jeans", "Preto"],
+      "sizes": ["36", "38", "40", "42", "44"],
+      "stock": {
+        "Jeans|36": 3,
+        "Jeans|38": 5,
+        "Jeans|40": 6,
+        "Jeans|42": 4,
+        "Jeans|44": 2,
+        "Preto|36": 2,
+        "Preto|38": 4,
+        "Preto|40": 4,
+        "Preto|42": 2,
+        "Preto|44": 1
+      },
+      "featured": false
+    },
+    {
+      "id": "vestido-linho",
+      "name": "Vestido Linho",
+      "category": "Vestidos",
+      "price": 189.9,
+      "description": "Vestido fresco com modelagem limpa para dias quentes.",
+      "image": "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=900&q=80",
+      "colors": ["Off white", "Terracota"],
+      "sizes": ["P", "M", "G"],
+      "stock": {
+        "Off white|P": 4,
+        "Off white|M": 6,
+        "Off white|G": 3,
+        "Terracota|P": 3,
+        "Terracota|M": 4,
+        "Terracota|G": 2
+      },
+      "featured": true
+    }
+  ],
+  "orders": []
+}
