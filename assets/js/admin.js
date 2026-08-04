@@ -22,6 +22,12 @@ const dashboardPaidRevenue = document.querySelector("#dashboardPaidRevenue");
 const dashboardAverageTicket = document.querySelector("#dashboardAverageTicket");
 const dashboardActiveOrders = document.querySelector("#dashboardActiveOrders");
 const statusSummary = document.querySelector("#statusSummary");
+const adminTabs = document.querySelectorAll("[data-admin-tab]");
+const adminPanels = {
+  create: document.querySelector("#adminPanelCreate"),
+  ads: document.querySelector("#adminPanelAds"),
+  orders: document.querySelector("#adminPanelOrders")
+};
 
 const money = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -30,6 +36,10 @@ const money = new Intl.NumberFormat("pt-BR", {
 
 let selectedImage = "";
 let storeSettings = { hideDemoProducts: false };
+
+function getDemoProducts() {
+  return window.DEMO_PRODUCTS || [];
+}
 
 function getToken() {
   return localStorage.getItem("kvAdminToken") || "";
@@ -240,31 +250,64 @@ function getFallbackImage(category) {
     : "https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=900&q=80";
 }
 
-async function renderAdminProducts() {
-  const products = await loadAdminProducts();
-  productCount.textContent = products.length;
+async function renderActiveAds() {
+  const adminProducts = await loadAdminProducts();
+  const demoProducts = getDemoProducts();
+  const activeDemoProducts = storeSettings.hideDemoProducts ? [] : demoProducts;
+  const activeCount = adminProducts.length + activeDemoProducts.length;
+  productCount.textContent = activeCount;
 
-  productsList.innerHTML = products.length
-    ? products.map(product => `
-      <article class="admin-product-item">
-        <img src="${product.image}" alt="${product.name}">
-        <div>
-          <span class="product-category">${categoryLabel(product.category)}</span>
-          <h3>${product.name}</h3>
-          <p>${product.description}</p>
-          <p>Estoque: ${product.stock || 0}</p>
-          ${(product.sizes || []).length ? `<p>Tamanhos: ${product.sizes.join(", ")}</p>` : ""}
-          ${(product.colors || []).length ? `<p>Cores: ${product.colors.join(", ")}</p>` : ""}
-          <strong>${money.format(product.price)}</strong>
-          ${product.oldPrice ? `<span class="old-price">${money.format(product.oldPrice)}</span>` : ""}
+  const demoCards = demoProducts.map(product => `
+    <article class="admin-product-item ${storeSettings.hideDemoProducts ? "is-inactive-ad" : ""}">
+      <img src="${product.image}" alt="${product.name}">
+      <div>
+        <div class="ad-badges">
+          <span class="ad-badge">Demonstracao</span>
+          <span class="ad-status ${storeSettings.hideDemoProducts ? "inactive" : "active"}">
+            ${storeSettings.hideDemoProducts ? "Inativo" : "Ativo"}
+          </span>
         </div>
-        <div class="admin-row-actions">
-          <button class="remove-btn" type="button" data-edit-product="${product.id}">Editar</button>
-          <button class="remove-btn" type="button" data-delete-product="${product.id}">Remover</button>
+        <span class="product-category">${categoryLabel(product.category)}</span>
+        <h3>${product.name}</h3>
+        <p>${product.description}</p>
+        <strong>${money.format(product.price)}</strong>
+        ${product.oldPrice ? `<span class="old-price">${money.format(product.oldPrice)}</span>` : ""}
+      </div>
+      <div class="admin-row-actions">
+        <button class="remove-btn" type="button" data-toggle-demo-products>
+          ${storeSettings.hideDemoProducts ? "Ativar ficticios" : "Ocultar ficticios"}
+        </button>
+      </div>
+    </article>
+  `);
+
+  const adminCards = adminProducts.map(product => `
+    <article class="admin-product-item">
+      <img src="${product.image}" alt="${product.name}">
+      <div>
+        <div class="ad-badges">
+          <span class="ad-badge real">Anuncio real</span>
+          <span class="ad-status active">Ativo</span>
         </div>
-      </article>
-    `).join("")
-    : '<p class="empty-state">Nenhum anuncio criado ainda.</p>';
+        <span class="product-category">${categoryLabel(product.category)}</span>
+        <h3>${product.name}</h3>
+        <p>${product.description}</p>
+        <p>Estoque: ${product.stock || 0}</p>
+        ${(product.sizes || []).length ? `<p>Tamanhos: ${product.sizes.join(", ")}</p>` : ""}
+        ${(product.colors || []).length ? `<p>Cores: ${product.colors.join(", ")}</p>` : ""}
+        <strong>${money.format(product.price)}</strong>
+        ${product.oldPrice ? `<span class="old-price">${money.format(product.oldPrice)}</span>` : ""}
+      </div>
+      <div class="admin-row-actions">
+        <button class="remove-btn" type="button" data-edit-product="${product.id}">Editar</button>
+        <button class="remove-btn" type="button" data-delete-product="${product.id}">Remover</button>
+      </div>
+    </article>
+  `);
+
+  productsList.innerHTML = [...adminCards, ...demoCards].length
+    ? [...adminCards, ...demoCards].join("")
+    : '<p class="empty-state">Nenhum anuncio ativo ainda.</p>';
 }
 
 async function renderDashboard() {
@@ -282,6 +325,26 @@ function renderStoreSettings() {
   toggleDemoProductsButton.textContent = storeSettings.hideDemoProducts
     ? "Mostrar anuncios ficticios"
     : "Ocultar anuncios ficticios";
+}
+
+function showAdminTab(tabName) {
+  adminTabs.forEach(tab => {
+    tab.classList.toggle("is-active", tab.dataset.adminTab === tabName);
+  });
+  Object.entries(adminPanels).forEach(([name, panel]) => {
+    panel.classList.toggle("is-hidden", name !== tabName);
+  });
+}
+
+async function toggleDemoProducts() {
+  storeSettings = await saveStoreSettings({
+    hideDemoProducts: !storeSettings.hideDemoProducts
+  });
+  renderStoreSettings();
+  await renderActiveAds();
+  adminMessage.textContent = storeSettings.hideDemoProducts
+    ? "Anuncios ficticios ocultados da loja."
+    : "Anuncios ficticios voltaram para a loja.";
 }
 
 async function renderOrders() {
@@ -363,7 +426,8 @@ form.addEventListener("submit", async event => {
       adminMessage.textContent = "Anuncio criado com sucesso. Ele ja aparece na loja.";
     }
     resetProductForm();
-    await renderAdminProducts();
+    await renderActiveAds();
+    showAdminTab("ads");
   } catch (error) {
     adminMessage.textContent = error.message;
   }
@@ -372,6 +436,11 @@ form.addEventListener("submit", async event => {
 productsList.addEventListener("click", async event => {
   const editButton = event.target.closest("[data-edit-product]");
   const button = event.target.closest("[data-delete-product]");
+  const demoToggle = event.target.closest("[data-toggle-demo-products]");
+  if (demoToggle) {
+    await toggleDemoProducts();
+    return;
+  }
   if (editButton) {
     const products = await loadAdminProducts();
     const product = products.find(item => Number(item.id) === Number(editButton.dataset.editProduct));
@@ -391,6 +460,7 @@ productsList.addEventListener("click", async event => {
     productSubmitButton.textContent = "Salvar alteracoes";
     cancelEditButton.classList.remove("is-hidden");
     setPreview(product.image);
+    showAdminTab("create");
     window.scrollTo({ top: form.offsetTop - 90, behavior: "smooth" });
     return;
   }
@@ -398,30 +468,28 @@ productsList.addEventListener("click", async event => {
 
   if (!confirm("Remover este anuncio?")) return;
   await deleteAdminProduct(button.dataset.deleteProduct);
-  await renderAdminProducts();
+  await renderActiveAds();
 });
 
 cancelEditButton.addEventListener("click", resetProductForm);
 
 clearButton.addEventListener("click", async () => {
   await clearAdminProductList();
-  await renderAdminProducts();
+  await renderActiveAds();
   await renderDashboard();
   adminMessage.textContent = "Anuncios criados foram removidos.";
 });
 
 toggleDemoProductsButton.addEventListener("click", async () => {
   try {
-    storeSettings = await saveStoreSettings({
-      hideDemoProducts: !storeSettings.hideDemoProducts
-    });
-    renderStoreSettings();
-    adminMessage.textContent = storeSettings.hideDemoProducts
-      ? "Anuncios ficticios ocultados da loja."
-      : "Anuncios ficticios voltaram para a loja.";
+    await toggleDemoProducts();
   } catch (error) {
     adminMessage.textContent = error.message;
   }
+});
+
+adminTabs.forEach(tab => {
+  tab.addEventListener("click", () => showAdminTab(tab.dataset.adminTab));
 });
 
 ordersList.addEventListener("change", async event => {
@@ -469,7 +537,7 @@ async function bootAdmin() {
     storeSettings = await loadStoreSettings();
     renderStoreSettings();
     await renderDashboard();
-    await renderAdminProducts();
+    await renderActiveAds();
     await renderOrders();
   } catch (error) {
     localStorage.removeItem("kvAdminToken");

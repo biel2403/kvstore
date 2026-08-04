@@ -21,6 +21,7 @@ O projeto ja tem:
 - Alteracao de status de pedido no admin.
 - Tela admin para criar anuncio de produto.
 - Opcao no admin para ocultar/mostrar anuncios ficticios da vitrine.
+- Aba de anuncios ativos no admin, com anuncios reais e ficticios organizados por status.
 - Upload/preview de foto no admin.
 - Login no admin.
 - Protecao das rotas administrativas no backend.

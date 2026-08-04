@@ -661,6 +661,33 @@ textarea {
   padding: 10px 0 18px;
 }
 
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  width: min(var(--container), calc(100% - 36px));
+  margin: 0 auto;
+  overflow-x: auto;
+  padding: 4px 0 14px;
+}
+
+.admin-tab {
+  min-height: 42px;
+  padding: 10px 14px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.admin-tab.is-active {
+  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
 .admin-form,
 .admin-side,
 .admin-product-item,
@@ -787,6 +814,48 @@ textarea {
 .admin-order-item p {
   color: var(--muted);
   line-height: 1.55;
+}
+
+.admin-product-item.is-inactive-ad {
+  opacity: 0.72;
+}
+
+.ad-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.ad-badge,
+.ad-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 5px 8px;
+  border-radius: var(--radius);
+  font-size: 0.74rem;
+  font-weight: 950;
+}
+
+.ad-badge {
+  color: var(--primary);
+  background: rgba(33, 63, 112, 0.1);
+}
+
+.ad-badge.real {
+  color: #7a5a12;
+  background: rgba(198, 161, 91, 0.2);
+}
+
+.ad-status.active {
+  color: #126238;
+  background: rgba(31, 143, 85, 0.14);
+}
+
+.ad-status.inactive {
+  color: #8a3029;
+  background: rgba(168, 64, 52, 0.12);
 }
 
 .admin-row-actions {

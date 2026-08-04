@@ -5,7 +5,7 @@
   - As paginas index.html, produto.html e categoria.html usam esta mesma lista.
 */
 
-window.STORE_PRODUCTS = [
+window.DEMO_PRODUCTS = [
   {
     id: 1,
     slug: "vestido-midi-linho",
@@ -91,6 +91,8 @@ window.STORE_PRODUCTS = [
     sale: true
   }
 ];
+
+window.STORE_PRODUCTS = [...window.DEMO_PRODUCTS];
 
 window.ADMIN_PRODUCTS_KEY = "kvAdminProducts";
 

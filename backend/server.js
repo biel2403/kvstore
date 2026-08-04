@@ -612,7 +612,9 @@ function validateProduct(product) {
 async function catalogScript() {
   const products = await allProducts();
   const adminProducts = await readAdminProducts();
-  return `window.STORE_PRODUCTS = ${JSON.stringify(products, null, 2)};
+  const demoProducts = readBaseProducts();
+  return `window.DEMO_PRODUCTS = ${JSON.stringify(demoProducts, null, 2)};
+window.STORE_PRODUCTS = ${JSON.stringify(products, null, 2)};
 window.ADMIN_PRODUCTS_KEY = "kvAdminProducts";
 window.getAdminProducts = function getAdminProducts() {
   return ${JSON.stringify(adminProducts, null, 2)};

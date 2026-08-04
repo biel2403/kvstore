@@ -69,7 +69,13 @@
         </div>
       </section>
 
-      <section class="admin-layout">
+      <div class="admin-tabs" role="tablist" aria-label="Areas do painel">
+        <button class="admin-tab is-active" type="button" data-admin-tab="create">Criar anuncio</button>
+        <button class="admin-tab" type="button" data-admin-tab="ads">Anuncios ativos</button>
+        <button class="admin-tab" type="button" data-admin-tab="orders">Pedidos</button>
+      </div>
+
+      <section class="admin-layout admin-panel" id="adminPanelCreate">
         <form class="admin-form" id="adminProductForm">
           <input type="hidden" name="editingId" id="editingProductId">
           <div class="form-grid">
@@ -145,7 +151,7 @@
 
         <aside class="admin-side">
           <div class="metric">
-            <span>Anuncios criados</span>
+            <span>Anuncios ativos</span>
             <strong id="adminProductCount">0</strong>
           </div>
           <div class="metric">
@@ -153,20 +159,22 @@
             <strong id="adminOrderCount">0</strong>
           </div>
           <div class="status-summary" id="statusSummary"></div>
-          <button class="btn btn-primary full-width" id="toggleDemoProducts" type="button">Ocultar anuncios ficticios</button>
           <button class="btn btn-dark full-width" id="clearAdminProducts" type="button">Limpar anuncios criados</button>
         </aside>
       </section>
 
-      <section class="section admin-products-section">
-        <div class="section-heading">
-          <p class="eyebrow">Seus anuncios</p>
-          <h2>Produtos cadastrados</h2>
+      <section class="section admin-products-section admin-panel is-hidden" id="adminPanelAds">
+        <div class="section-heading shop-heading">
+          <div>
+            <p class="eyebrow">Vitrine</p>
+            <h2>Anuncios ativos</h2>
+          </div>
+          <button class="btn btn-primary" id="toggleDemoProducts" type="button">Ocultar anuncios ficticios</button>
         </div>
         <div class="admin-products-list" id="adminProductsList"></div>
       </section>
 
-      <section class="section admin-products-section">
+      <section class="section admin-products-section admin-panel is-hidden" id="adminPanelOrders">
         <div class="section-heading">
           <p class="eyebrow">Pedidos</p>
           <h2>Pedidos recebidos</h2>
