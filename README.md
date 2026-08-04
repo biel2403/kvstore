@@ -27,7 +27,7 @@ O projeto ja tem:
 - Protecao das rotas administrativas no backend.
 - Painel de vendas com faturamento, receita paga, ticket medio e pedidos ativos.
 - Edicao de produtos criados no admin.
-- Campos de estoque, tamanhos e cores para produtos criados no admin.
+- Campos de estoque, selecao de tamanhos e cores para produtos criados no admin.
 - Pagina de sucesso do pedido.
 - Paginas de contato e trocas/devolucoes.
 - Backend Node.js.

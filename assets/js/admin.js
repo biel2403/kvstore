@@ -244,6 +244,13 @@ function resetProductForm() {
   setPreview("");
 }
 
+function setSelectedSizes(sizes = []) {
+  const selectedSizes = new Set(sizes.map(String));
+  form.querySelectorAll('input[name="sizes"]').forEach(input => {
+    input.checked = selectedSizes.has(input.value);
+  });
+}
+
 function getFallbackImage(category) {
   return category === "Calcados"
     ? "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=900&q=80"
@@ -407,7 +414,7 @@ form.addEventListener("submit", async event => {
     description,
     image,
     stock: Number(formData.get("stock") || 0),
-    sizes: String(formData.get("sizes") || "").split(",").map(item => item.trim()).filter(Boolean),
+    sizes: formData.getAll("sizes"),
     colors: String(formData.get("colors") || "").split(",").map(item => item.trim()).filter(Boolean),
     sale: Boolean(formData.get("sale"))
   };
@@ -451,7 +458,7 @@ productsList.addEventListener("click", async event => {
     form.elements.price.value = product.price;
     form.elements.oldPrice.value = product.oldPrice || "";
     form.elements.stock.value = product.stock || 0;
-    form.elements.sizes.value = (product.sizes || []).join(", ");
+    setSelectedSizes(product.sizes || []);
     form.elements.colors.value = (product.colors || []).join(", ");
     form.elements.sale.checked = Boolean(product.sale);
     form.elements.description.value = product.description;

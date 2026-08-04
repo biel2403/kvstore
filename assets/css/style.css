@@ -718,6 +718,59 @@ textarea {
   font-weight: 800;
 }
 
+.size-picker {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.size-picker legend {
+  margin-bottom: 7px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.size-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.size-options label {
+  display: block;
+}
+
+.size-options input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.size-options span {
+  display: grid;
+  min-width: 44px;
+  min-height: 38px;
+  place-items: center;
+  padding: 8px 10px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.size-options input:checked + span {
+  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.size-options input:focus-visible + span {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .checkbox-label {
   display: flex !important;
   align-items: center;
