@@ -7,7 +7,7 @@
 window.KV_STORE_CONFIG = {
   storeName: "Vasconcelos",
   whatsappNumber: "5515991280671",
-  apiBaseUrl: ""
+  apiBaseUrl: "https://kvstore-mtmk.onrender.com"
 };
 
 window.kvApiBaseUrl = function kvApiBaseUrl() {
