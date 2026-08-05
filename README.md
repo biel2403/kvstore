@@ -152,6 +152,7 @@ Projeto Loj/
 |-- package.json
 |-- assets/
 |   |-- css/
+|   |   |-- parcelados.css
 |   |   `-- style.css
 |   |-- img/
 |   |   `-- vasconcelos-logo.png
@@ -161,11 +162,12 @@ Projeto Loj/
 |       |-- checkout.js
 |       |-- config.js
 |       |-- categoria.js
+|       |-- parcelados.js
 |       |-- produto.js
 |       `-- script.js
 |-- backend/
-|   |-- db.json
 |   |-- schema.sql
+|   |-- schema.postgres.sql
 |   |-- server.js
 |   `-- store.sqlite
 |-- pages/
@@ -176,8 +178,12 @@ Projeto Loj/
 |   |-- produto.html
 |   |-- sucesso.html
 |   `-- trocas.html
-`-- legacy-node-version/
+`-- archive/
+    |-- legacy-node-version/
+    `-- roseli-projeto-original/
 ```
+
+Observacao: `backend/store.sqlite`, `backend/db.json` e `archive/roseli-projeto-original/` ficam ignorados no Git. Eles servem para uso local ou referencia antiga, nao para o deploy principal.
 
 ## Onde Personalizar
 
@@ -467,13 +473,18 @@ As rotas administrativas exigem token de login.
 
 ## Arquivos Antigos
 
-A pasta abaixo guarda uma versao anterior do projeto:
+As pastas antigas ficam dentro de `archive/` para nao misturar com a loja atual:
 
 ```text
-legacy-node-version/
+archive/legacy-node-version/
+archive/roseli-projeto-original/
 ```
 
-Ela pode ser mantida como referencia. A versao principal agora usa:
+`archive/legacy-node-version/` guarda uma versao antiga da loja que ainda esta versionada.
+
+`archive/roseli-projeto-original/` guarda a copia original do controle de pagamentos Roseli. Ela fica ignorada no Git porque contem um `.git` interno e nao deve ir para o deploy.
+
+A versao principal agora usa:
 
 ```text
 index.html
