@@ -12,6 +12,8 @@ const productsList = document.querySelector("#adminProductsList");
 const productCount = document.querySelector("#adminProductCount");
 const ordersList = document.querySelector("#adminOrdersList");
 const orderCount = document.querySelector("#adminOrderCount");
+const clubList = document.querySelector("#adminClubList");
+const clubCount = document.querySelector("#adminClubCount");
 const clearButton = document.querySelector("#clearAdminProducts");
 const toggleDemoProductsButton = document.querySelector("#toggleDemoProducts");
 const editingProductId = document.querySelector("#editingProductId");
@@ -26,7 +28,8 @@ const adminTabs = document.querySelectorAll("[data-admin-tab]");
 const adminPanels = {
   create: document.querySelector("#adminPanelCreate"),
   ads: document.querySelector("#adminPanelAds"),
-  orders: document.querySelector("#adminPanelOrders")
+  orders: document.querySelector("#adminPanelOrders"),
+  club: document.querySelector("#adminPanelClub")
 };
 
 const money = new Intl.NumberFormat("pt-BR", {
@@ -164,6 +167,16 @@ async function loadOrders() {
 
   const response = await fetch(window.kvApiUrl("/api/orders"), { headers: authHeaders() });
   if (!response.ok) throw new Error("Nao foi possivel carregar os pedidos.");
+  return response.json();
+}
+
+async function loadClubMembers() {
+  if (!hasBackend()) {
+    return JSON.parse(localStorage.getItem("kvClubMembers") || "[]");
+  }
+
+  const response = await fetch(window.kvApiUrl("/api/club-members"), { headers: authHeaders() });
+  if (!response.ok) throw new Error("Nao foi possivel carregar o Clube VIP.");
   return response.json();
 }
 
@@ -378,6 +391,29 @@ async function renderOrders() {
     : '<p class="empty-state">Nenhum pedido recebido ainda.</p>';
 }
 
+async function renderClubMembers() {
+  const members = await loadClubMembers();
+  clubCount.textContent = members.length;
+
+  clubList.innerHTML = members.length
+    ? members.map(member => `
+      <article class="admin-order-item">
+        <div>
+          <div class="ad-badges">
+            <span class="ad-badge real">${member.source || "Clube Vasconcelos"}</span>
+            <span class="ad-status active">${member.status || "Ativo"}</span>
+          </div>
+          <span class="product-category">${member.email}</span>
+          <h3>${member.name}</h3>
+          <p>WhatsApp: ${member.phone}</p>
+          <p>Cadastro: ${member.createdAt ? new Date(member.createdAt).toLocaleString("pt-BR") : "Data nao informada"}</p>
+        </div>
+        <a class="remove-btn" href="https://wa.me/${String(member.phone || "").replace(/\D/g, "")}" target="_blank" rel="noopener">Chamar no WhatsApp</a>
+      </article>
+    `).join("")
+    : '<p class="empty-state">Nenhum membro VIP cadastrado ainda.</p>';
+}
+
 imageFile.addEventListener("change", async event => {
   const file = event.target.files[0];
   if (!file) return;
@@ -546,6 +582,7 @@ async function bootAdmin() {
     await renderDashboard();
     await renderActiveAds();
     await renderOrders();
+    await renderClubMembers();
   } catch (error) {
     localStorage.removeItem("kvAdminToken");
     loginMessage.textContent = "Sessao expirada. Entre novamente.";

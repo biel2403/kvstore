@@ -942,6 +942,10 @@ textarea {
   align-content: start;
 }
 
+.newsletter-form input {
+  width: 100%;
+}
+
 .form-message {
   min-height: 22px;
   margin: 0;

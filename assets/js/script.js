@@ -211,8 +211,43 @@ document.querySelectorAll(".main-nav a").forEach(link => {
 
 newsletterForm.addEventListener("submit", event => {
   event.preventDefault();
-  newsletterMessage.textContent = "Cadastro realizado com sucesso!";
-  newsletterForm.reset();
+  const formData = new FormData(newsletterForm);
+  const member = {
+    name: String(formData.get("name") || "").trim(),
+    phone: String(formData.get("phone") || "").trim(),
+    email: String(formData.get("email") || "").trim(),
+    source: "Clube Vasconcelos"
+  };
+
+  newsletterMessage.textContent = "Salvando cadastro...";
+
+  const savePromise = window.kvHasBackend && window.kvHasBackend()
+    ? fetch(window.kvApiUrl("/api/club-members"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(member)
+      }).then(async response => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Nao foi possivel cadastrar.");
+        return data;
+      })
+    : Promise.resolve().then(() => {
+        const members = JSON.parse(localStorage.getItem("kvClubMembers") || "[]");
+        const existingIndex = members.findIndex(item => item.email === member.email);
+        const storedMember = { ...member, id: Date.now(), createdAt: new Date().toISOString(), status: "Ativo" };
+        if (existingIndex >= 0) members[existingIndex] = { ...members[existingIndex], ...storedMember };
+        else members.unshift(storedMember);
+        localStorage.setItem("kvClubMembers", JSON.stringify(members));
+      });
+
+  savePromise
+    .then(() => {
+      newsletterMessage.textContent = "Cadastro VIP realizado com sucesso!";
+      newsletterForm.reset();
+    })
+    .catch(error => {
+      newsletterMessage.textContent = error.message;
+    });
 });
 
 window.addEventListener("scroll", () => {

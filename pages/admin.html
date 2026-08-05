@@ -73,6 +73,7 @@
         <button class="admin-tab is-active" type="button" data-admin-tab="create">Criar anuncio</button>
         <button class="admin-tab" type="button" data-admin-tab="ads">Anuncios ativos</button>
         <button class="admin-tab" type="button" data-admin-tab="orders">Pedidos</button>
+        <button class="admin-tab" type="button" data-admin-tab="club">Clube VIP</button>
       </div>
 
       <section class="admin-layout admin-panel" id="adminPanelCreate">
@@ -171,6 +172,10 @@
             <span>Pedidos recebidos</span>
             <strong id="adminOrderCount">0</strong>
           </div>
+          <div class="metric">
+            <span>Membros VIP</span>
+            <strong id="adminClubCount">0</strong>
+          </div>
           <div class="status-summary" id="statusSummary"></div>
           <a class="btn btn-primary full-width" href="parcelados.html">Controle de pagamentos</a>
           <button class="btn btn-dark full-width" id="clearAdminProducts" type="button">Limpar anuncios criados</button>
@@ -194,6 +199,16 @@
           <h2>Pedidos recebidos</h2>
         </div>
         <div class="admin-products-list" id="adminOrdersList"></div>
+      </section>
+
+      <section class="section admin-products-section admin-panel is-hidden" id="adminPanelClub">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Clube Vasconcelos</p>
+            <h2>Membros VIP</h2>
+          </div>
+        </div>
+        <div class="admin-products-list" id="adminClubList"></div>
       </section>
     </main>
 

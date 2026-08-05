@@ -44,6 +44,17 @@ CREATE TABLE IF NOT EXISTS store_settings (
   value TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS club_members (
+  id BIGSERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  source TEXT NOT NULL DEFAULT 'Clube Vasconcelos',
+  status TEXT NOT NULL DEFAULT 'Ativo',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS payment_agreements (
   id TEXT PRIMARY KEY,
   order_id TEXT,

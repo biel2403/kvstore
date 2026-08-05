@@ -108,6 +108,98 @@ async function updateStoreSettings(payload) {
   return readStoreSettings();
 }
 
+function memberFromRow(row) {
+  return {
+    id: Number(row.id),
+    name: row.name,
+    phone: row.phone,
+    email: row.email,
+    source: row.source,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
+function normalizeClubMember(payload) {
+  return {
+    name: String(payload.name || payload.nome || "").trim(),
+    phone: String(payload.phone || payload.whatsapp || "").trim(),
+    email: String(payload.email || "").trim().toLowerCase(),
+    source: String(payload.source || "Clube Vasconcelos").trim() || "Clube Vasconcelos",
+    status: String(payload.status || "Ativo").trim() || "Ativo"
+  };
+}
+
+function validateClubMember(member) {
+  if (!member.name) return "Nome e obrigatorio.";
+  if (!member.phone) return "WhatsApp e obrigatorio.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(member.email)) return "Email invalido.";
+  return "";
+}
+
+async function readClubMembers() {
+  const rows = USE_POSTGRES
+    ? await pgQuery(`
+      SELECT id, name, phone, email, source, status, created_at, updated_at
+      FROM club_members
+      ORDER BY created_at DESC, id DESC;
+    `)
+    : query(`
+      SELECT id, name, phone, email, source, status, created_at, updated_at
+      FROM club_members
+      ORDER BY created_at DESC, id DESC;
+    `);
+
+  return rows.map(memberFromRow);
+}
+
+async function saveClubMember(payload) {
+  const member = normalizeClubMember(payload);
+  const error = validateClubMember(member);
+  if (error) throw new Error(error);
+
+  if (USE_POSTGRES) {
+    const rows = await pgQuery(`
+      INSERT INTO club_members (name, phone, email, source, status, updated_at)
+      VALUES ($1, $2, $3, $4, $5, NOW())
+      ON CONFLICT (email) DO UPDATE SET
+        name = EXCLUDED.name,
+        phone = EXCLUDED.phone,
+        source = EXCLUDED.source,
+        status = 'Ativo',
+        updated_at = NOW()
+      RETURNING id, name, phone, email, source, status, created_at, updated_at;
+    `, [member.name, member.phone, member.email, member.source, member.status]);
+    return memberFromRow(rows[0]);
+  }
+
+  execute(`
+    INSERT INTO club_members (name, phone, email, source, status, updated_at)
+    VALUES (
+      ${sqlValue(member.name)},
+      ${sqlValue(member.phone)},
+      ${sqlValue(member.email)},
+      ${sqlValue(member.source)},
+      ${sqlValue(member.status)},
+      CURRENT_TIMESTAMP
+    )
+    ON CONFLICT(email) DO UPDATE SET
+      name = excluded.name,
+      phone = excluded.phone,
+      source = excluded.source,
+      status = 'Ativo',
+      updated_at = CURRENT_TIMESTAMP;
+  `);
+
+  const rows = query(`
+    SELECT id, name, phone, email, source, status, created_at, updated_at
+    FROM club_members
+    WHERE email = ${sqlValue(member.email)};
+  `);
+  return memberFromRow(rows[0]);
+}
+
 function todayIso() {
   const now = new Date();
   const year = now.getFullYear();
@@ -984,6 +1076,19 @@ async function handleApi(req, res, url) {
   if (req.method === "PATCH" && url.pathname === "/api/settings") {
     if (!requireAdmin(req, res)) return;
     return sendJson(res, 200, await updateStoreSettings(await parseBody(req)));
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/club-members") {
+    if (!requireAdmin(req, res)) return;
+    return sendJson(res, 200, await readClubMembers());
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/club-members") {
+    try {
+      return sendJson(res, 201, await saveClubMember(await parseBody(req)));
+    } catch (error) {
+      return sendJson(res, 400, { error: error.message });
+    }
   }
 
   if (req.method === "POST" && url.pathname === "/api/products") {
