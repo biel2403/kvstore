@@ -528,3 +528,43 @@ Isso ficou como etapa futura porque agora a loja finaliza pelo WhatsApp. Para pa
 - Variaveis de ambiente.
 - Logs de erro.
 - Migrar para PostgreSQL se a loja crescer muito.
+
+### Controle De Pagamentos Parcelados
+
+Pagina:
+
+```text
+pages/parcelados.html
+```
+
+Arquivos:
+
+```text
+assets/css/parcelados.css
+assets/js/parcelados.js
+assets/js/parcelados.config.example.js
+```
+
+Por seguranca, a URL real do Google Apps Script nao fica no GitHub.
+
+Para ativar o controle de pagamentos, crie uma copia local do arquivo:
+
+```text
+assets/js/parcelados.config.example.js
+```
+
+Com o nome:
+
+```text
+assets/js/parcelados.config.js
+```
+
+Depois coloque a URL real:
+
+```js
+window.PARCELADOS_CONFIG = {
+  appsScriptUrl: "https://script.google.com/macros/s/SUA_URL/exec"
+};
+```
+
+Esse arquivo esta no `.gitignore`, entao nao sera enviado para o repositorio.

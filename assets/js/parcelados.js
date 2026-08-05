@@ -3,8 +3,9 @@
 //  Dados salvos em Google Sheets via Apps Script.
 // ============================================================
 
-// Depois de publicar o Code.gs como Web App, cole a URL aqui.
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxob30K4mUKz5teTvlMT1aKEWQ7YHld7B1qWWkFIgG6-Brsp3nG9H6uqjzRUuIZFX7y3w/exec';
+// Crie um arquivo local em assets/js/parcelados.config.js com:
+// window.PARCELADOS_CONFIG = { appsScriptUrl: "SUA_URL_DO_APPS_SCRIPT" };
+const APPS_SCRIPT_URL = window.PARCELADOS_CONFIG?.appsScriptUrl || "";
 
 const AUTH_TOKEN_KEY = 'parcelados_auth_token';
 const STATUS_FUNIL = ['Em dia', 'Vence hoje', 'Atrasado', 'Quitado', 'Cancelado'];

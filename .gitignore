@@ -5,3 +5,4 @@ backend/store.sqlite
 backend/db.json
 *.log
 Roseli projeto/
+assets/js/parcelados.config.js
