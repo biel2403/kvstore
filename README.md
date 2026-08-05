@@ -21,7 +21,7 @@ O projeto foi pensado para uma loja pequena ou media que quer comecar a vender o
 - Controle de pagamentos parcelados integrado ao admin.
 - Criacao automatica de pagamento quando um pedido e feito.
 - Sincronizacao entre pedido cancelado e controle de pagamentos.
-- Cadastro VIP do Clube Vasconcelos salvo no banco.
+- Cadastro VIP do Clube KV salvo no banco.
 - Aba no admin para visualizar membros VIP e chamar pelo WhatsApp.
 - Backend em Node.js.
 - Banco local com SQLite e banco de producao com PostgreSQL.
@@ -121,11 +121,11 @@ Pastas principais:
 - `backend/`: servidor, API e estrutura do banco.
 - `archive/`: arquivos antigos guardados como referencia.
 
-## Clube Vasconcelos
+## Clube KV
 
-O Clube Vasconcelos funciona como uma lista VIP. A cliente informa nome, WhatsApp e e-mail na home, e o cadastro fica salvo no banco.
+O Clube KV funciona como uma lista VIP. A cliente informa nome, WhatsApp e e-mail na home, e o cadastro fica salvo no banco.
 
-No painel admin existe uma aba `Clube VIP` para visualizar os membros cadastrados e abrir conversa direto no WhatsApp.
+No painel admin existe uma aba `Clube KV` para visualizar os membros cadastrados e abrir conversa direto no WhatsApp.
 
 ## Personalizacao Rapida
 

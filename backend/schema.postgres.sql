@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS club_members (
   name TEXT NOT NULL,
   phone TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
-  source TEXT NOT NULL DEFAULT 'Clube Vasconcelos',
+  source TEXT NOT NULL DEFAULT 'Clube KV',
   status TEXT NOT NULL DEFAULT 'Ativo',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

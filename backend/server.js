@@ -126,7 +126,7 @@ function normalizeClubMember(payload) {
     name: String(payload.name || payload.nome || "").trim(),
     phone: String(payload.phone || payload.whatsapp || "").trim(),
     email: String(payload.email || "").trim().toLowerCase(),
-    source: String(payload.source || "Clube Vasconcelos").trim() || "Clube Vasconcelos",
+    source: String(payload.source || "Clube KV").trim() || "Clube KV",
     status: String(payload.status || "Ativo").trim() || "Ativo"
   };
 }

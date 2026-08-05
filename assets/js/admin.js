@@ -176,7 +176,7 @@ async function loadClubMembers() {
   }
 
   const response = await fetch(window.kvApiUrl("/api/club-members"), { headers: authHeaders() });
-  if (!response.ok) throw new Error("Nao foi possivel carregar o Clube VIP.");
+  if (!response.ok) throw new Error("Nao foi possivel carregar o Clube KV.");
   return response.json();
 }
 
@@ -400,7 +400,7 @@ async function renderClubMembers() {
       <article class="admin-order-item">
         <div>
           <div class="ad-badges">
-            <span class="ad-badge real">${member.source || "Clube Vasconcelos"}</span>
+            <span class="ad-badge real">${member.source || "Clube KV"}</span>
             <span class="ad-status active">${member.status || "Ativo"}</span>
           </div>
           <span class="product-category">${member.email}</span>

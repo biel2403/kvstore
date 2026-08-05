@@ -216,7 +216,7 @@ newsletterForm.addEventListener("submit", event => {
     name: String(formData.get("name") || "").trim(),
     phone: String(formData.get("phone") || "").trim(),
     email: String(formData.get("email") || "").trim(),
-    source: "Clube Vasconcelos"
+    source: "Clube KV"
   };
 
   newsletterMessage.textContent = "Salvando cadastro...";
