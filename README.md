@@ -1,46 +1,60 @@
-# KV Store / Vasconcelos - Loja Online
+# KV Store / Vasconcelos
 
-Projeto de loja online para roupas e calcados, com frontend em HTML/CSS/JavaScript puro, painel admin, backend em Node.js, PostgreSQL para producao e SQLite como fallback local.
+Loja online moderna para roupas, calcados e vendas pelo WhatsApp, com vitrine responsiva, carrinho, painel administrativo, controle de pedidos e controle de pagamentos parcelados.
 
-## Estado Atual
+O projeto foi pensado para uma loja pequena ou media que quer comecar a vender online de forma simples: o cliente monta o carrinho, informa os dados e finaliza o pedido pelo WhatsApp da proprietaria.
 
-O projeto ja tem:
+## O Que A Loja Ja Tem
 
-- Home responsiva.
-- Identidade visual baseada na logo KV / Vasconcelos.
-- Categorias: `Feminina` e `Calcados`.
-- Vitrine de produtos.
-- Pagina de produto.
+- Home responsiva com identidade visual baseada na logo KV / Vasconcelos.
+- Categorias principais: feminina e calcados.
+- Pagina individual de produto.
 - Pagina de categoria.
-- Carrinho lateral funcional.
-- Persistencia do carrinho no navegador.
+- Carrinho lateral com persistencia no navegador.
 - Checkout com dados do cliente.
-- Finalizacao de pedido pelo WhatsApp da proprietaria.
-- Cadastro de pedidos em banco de dados.
-- Tela admin para ver pedidos.
-- Alteracao de status de pedido no admin.
-- Tela admin para criar anuncio de produto.
-- Opcao no admin para ocultar/mostrar anuncios ficticios da vitrine.
-- Aba de anuncios ativos no admin, com anuncios reais e ficticios organizados por status.
-- Acesso pelo admin ao controle de pagamentos parcelados.
-- Upload/preview de foto no admin.
-- Login no admin.
-- Protecao das rotas administrativas no backend.
-- Painel de vendas com faturamento, receita paga, ticket medio e pedidos ativos.
-- Edicao de produtos criados no admin.
-- Campos de estoque, selecao de tamanhos e cores para produtos criados no admin.
-- Pagina de sucesso do pedido.
-- Paginas de contato e trocas/devolucoes.
-- Backend Node.js.
-- Suporte a PostgreSQL via `DATABASE_URL`.
-- Fallback SQLite em `backend/store.sqlite` para testes locais.
-- API para listar, criar e remover produtos cadastrados pelo admin.
+- Finalizacao pelo WhatsApp com mensagem pronta.
+- Painel administrativo com login.
+- Cadastro, edicao e remocao de anuncios.
+- Aba de anuncios ativos, incluindo produtos ficticios e produtos cadastrados.
+- Controle de pedidos e status de venda.
+- Painel de vendas com resumo financeiro.
+- Controle de pagamentos parcelados integrado ao admin.
+- Criacao automatica de pagamento quando um pedido e feito.
+- Sincronizacao entre pedido cancelado e controle de pagamentos.
+- Backend em Node.js.
+- Banco local com SQLite e banco de producao com PostgreSQL.
 
-## Como Rodar Com Backend Local
+## Links Principais
 
-Use este modo para salvar os produtos do admin no SQLite local.
+Loja publicada:
 
-Na pasta do projeto, rode:
+```text
+https://kvstore.vercel.app/
+```
+
+Backend publicado:
+
+```text
+https://kvstore-mtmk.onrender.com
+```
+
+Admin:
+
+```text
+https://kvstore.vercel.app/pages/admin.html
+```
+
+Controle de pagamentos:
+
+```text
+https://kvstore.vercel.app/pages/parcelados.html
+```
+
+O controle de pagamentos deve ser acessado pelo painel admin.
+
+## Como Rodar Localmente
+
+Na pasta do projeto:
 
 ```bash
 npm start
@@ -52,513 +66,89 @@ Depois abra:
 http://localhost:3000
 ```
 
-Admin:
+Admin local:
 
 ```text
 http://localhost:3000/pages/admin.html
 ```
 
-O link do admin nao aparece no menu da loja. Guarde esse endereco e acesse direto pelo navegador quando precisar gerenciar produtos e pedidos.
-
-Login padrao local:
+Login local padrao:
 
 ```text
 Usuario: admin
 Senha: 1234
 ```
 
-Para trocar em um ambiente real, use variaveis de ambiente:
+Em producao, esses dados devem ser configurados por variaveis de ambiente no Render.
 
-```text
-ADMIN_USER
-ADMIN_PASSWORD
-ADMIN_TOKEN
-```
+## Como Funciona A Venda
 
-## Como Usar PostgreSQL
+1. O cliente escolhe os produtos.
+2. O cliente adiciona ao carrinho.
+3. O cliente preenche nome, telefone, endereco e forma de entrega.
+4. O site cria o pedido no backend.
+5. O site abre o WhatsApp da loja com a mensagem pronta.
+6. O admin acompanha o pedido pelo painel.
+7. O controle de pagamentos recebe automaticamente uma venda relacionada ao pedido.
 
-Em producao, crie um banco PostgreSQL no Render, Supabase ou Neon.
+Se o pedido for cancelado no admin, o pagamento vinculado tambem fica marcado como cancelado.
 
-Depois configure a variavel de ambiente no backend:
-
-```text
-DATABASE_URL=postgresql://usuario:senha@host:5432/nome_do_banco
-```
-
-Quando `DATABASE_URL` existe, o backend usa PostgreSQL automaticamente e cria as tabelas do arquivo:
-
-```text
-backend/schema.postgres.sql
-```
-
-Quando `DATABASE_URL` nao existe, ele continua usando SQLite local:
-
-```text
-backend/store.sqlite
-```
-
-Se estiver usando PostgreSQL local sem SSL, configure tambem:
-
-```text
-PGSSLMODE=disable
-```
-
-## Frontend Na Vercel E Backend No Render
-
-Quando o backend estiver publicado no Render, copie a URL dele e coloque em:
-
-```text
-assets/js/config.js
-```
-
-Campo:
-
-```js
-apiBaseUrl: "https://sua-api.onrender.com"
-```
-
-Exemplo:
-
-```js
-window.KV_STORE_CONFIG = {
-  storeName: "Vasconcelos",
-  whatsappNumber: "5515991280671",
-  apiBaseUrl: "https://kv-store-api.onrender.com"
-};
-```
-
-Localmente, deixe vazio:
-
-```js
-apiBaseUrl: ""
-```
-
-## Como Abrir Sem Backend
-
-Tambem da para abrir direto:
-
-```text
-index.html
-```
-
-Nesse modo, o admin salva os produtos apenas no navegador com `localStorage`.
-
-## Estrutura Das Pastas
+## Estrutura Do Projeto
 
 ```text
 Projeto Loj/
 |-- index.html
-|-- README.md
-|-- package.json
+|-- pages/
 |-- assets/
 |   |-- css/
-|   |   |-- parcelados.css
-|   |   `-- style.css
 |   |-- img/
-|   |   `-- vasconcelos-logo.png
 |   `-- js/
-|       |-- admin.js
-|       |-- catalog.js
-|       |-- checkout.js
-|       |-- config.js
-|       |-- categoria.js
-|       |-- parcelados.js
-|       |-- produto.js
-|       `-- script.js
 |-- backend/
-|   |-- schema.sql
-|   |-- schema.postgres.sql
-|   |-- server.js
-|   `-- store.sqlite
-|-- pages/
-|   |-- admin.html
-|   |-- categoria.html
-|   |-- contato.html
-|   |-- parcelados.html
-|   |-- produto.html
-|   |-- sucesso.html
-|   `-- trocas.html
-`-- archive/
-    |-- legacy-node-version/
-    `-- roseli-projeto-original/
+|-- archive/
+|-- package.json
+`-- README.md
 ```
 
-Observacao: `backend/store.sqlite`, `backend/db.json` e `archive/roseli-projeto-original/` ficam ignorados no Git. Eles servem para uso local ou referencia antiga, nao para o deploy principal.
+Pastas principais:
 
-## Onde Personalizar
+- `index.html`: pagina inicial da loja.
+- `pages/`: paginas internas, como admin, produto, categoria, contato e pagamentos.
+- `assets/css/`: estilos visuais.
+- `assets/js/`: funcionamento da loja no navegador.
+- `assets/img/`: imagens e logo.
+- `backend/`: servidor, API e estrutura do banco.
+- `archive/`: arquivos antigos guardados como referencia.
 
-### Nome Da Loja
+## Personalizacao Rapida
 
-Arquivos:
+Para trocar nome, visual, produtos, WhatsApp e textos da loja, consulte o arquivo local:
 
 ```text
-index.html
-pages/admin.html
-pages/produto.html
-pages/categoria.html
+INSTRUCOES_DE_EDICAO_LOCAL.md
 ```
 
-Procure por:
+Esse arquivo fica somente no computador local e nao sobe para o GitHub.
 
-```text
-KV Store
-Vasconcelos
-```
+## Deploy
 
-### Logo
+O projeto usa:
 
-Arquivo:
+- Vercel para o frontend.
+- Render para o backend.
+- PostgreSQL em producao.
+- SQLite apenas para testes locais.
 
-```text
-assets/img/vasconcelos-logo.png
-```
+Quando houver mudancas no GitHub, a Vercel e o Render podem atualizar automaticamente, dependendo da configuracao de deploy automatico.
 
-Para trocar a logo, substitua esse arquivo mantendo o mesmo nome, ou altere os caminhos dos `<img>` nos HTML.
+## Proximos Passos Recomendados
 
-### Cores, Fontes E Visual
+- Configurar dominio proprio.
+- Revisar fotos e descricoes reais dos produtos.
+- Validar estoque com mais detalhe por tamanho/cor.
+- Definir politica de entrega, troca e devolucao final.
+- Configurar rotina de backup do banco.
+- No futuro, integrar pagamento automatico se a loja crescer.
 
-Arquivo:
+## Observacao
 
-```text
-assets/css/style.css
-```
-
-As cores principais ficam no inicio do arquivo:
-
-```css
-:root {
-  --bg: #f8f1e6;
-  --surface: #fffaf2;
-  --text: #162b4f;
-  --primary: #213f70;
-  --accent: #c6a15b;
-}
-```
-
-### Produtos Fixos Da Loja
-
-Arquivo:
-
-```text
-assets/js/catalog.js
-```
-
-Formato de produto:
-
-```js
-{
-  id: 1,
-  slug: "vestido-midi-linho",
-  name: "Vestido Midi Linho",
-  category: "Feminina",
-  price: 219.9,
-  oldPrice: 299.9,
-  description: "Descricao do produto.",
-  image: "URL_DA_IMAGEM",
-  sale: true
-}
-```
-
-Categorias atuais:
-
-```text
-Feminina
-Calcados
-```
-
-No site, o valor interno usado nos links e filtros e:
-
-```text
-Calcados
-```
-
-### Produtos Criados No Admin
-
-Tela:
-
-```text
-pages/admin.html
-```
-
-Logica:
-
-```text
-assets/js/admin.js
-```
-
-Com backend ligado, os produtos criados no admin sao salvos em:
-
-```text
-PostgreSQL, se DATABASE_URL estiver configurado.
-SQLite local em backend/store.sqlite, se DATABASE_URL nao estiver configurado.
-```
-
-Sem backend, eles ficam no navegador na chave:
-
-```text
-kvAdminProducts
-```
-
-### Home
-
-Arquivo:
-
-```text
-index.html
-```
-
-Contem:
-
-- Header.
-- Menu.
-- Hero.
-- Categorias.
-- Vitrine.
-- Promocoes.
-- Newsletter.
-- Footer.
-
-### Pagina Do Produto
-
-Arquivo:
-
-```text
-pages/produto.html
-```
-
-Logica:
-
-```text
-assets/js/produto.js
-```
-
-URL:
-
-```text
-pages/produto.html?id=1
-```
-
-### Pagina Da Categoria
-
-Arquivo:
-
-```text
-pages/categoria.html
-```
-
-Logica:
-
-```text
-assets/js/categoria.js
-```
-
-URL:
-
-```text
-pages/categoria.html?category=Feminina
-pages/categoria.html?category=Calcados
-```
-
-### Carrinho
-
-Arquivos:
-
-```text
-assets/js/script.js
-assets/js/produto.js
-assets/js/categoria.js
-```
-
-Hoje o carrinho fica no navegador usando:
-
-```text
-fashionCart
-```
-
-Para limpar durante testes:
-
-```js
-localStorage.removeItem("fashionCart");
-```
-
-### WhatsApp Da Loja
-
-Arquivo:
-
-```text
-assets/js/config.js
-```
-
-Troque o numero abaixo pelo WhatsApp real da proprietaria:
-
-```js
-whatsappNumber: "5500000000000"
-```
-
-Use somente numeros, no formato internacional:
-
-```text
-55 + DDD + numero
-```
-
-Exemplo:
-
-```js
-whatsappNumber: "5511999999999"
-```
-
-Quando o cliente clicar em `Finalizar pelo WhatsApp`, o site:
-
-- cria o pedido no backend, se o site estiver rodando em `http://localhost:3000`;
-- salva o pedido no navegador, se abrir direto pelo `index.html`;
-- monta uma mensagem com produtos, quantidades, total e dados do cliente;
-- abre o WhatsApp da proprietaria com a mensagem pronta.
-
-## Backend
-
-Arquivo principal:
-
-```text
-backend/server.js
-```
-
-Schema do banco:
-
-```text
-backend/schema.sql
-backend/schema.postgres.sql
-```
-
-Banco local:
-
-```text
-backend/store.sqlite
-```
-
-SQLite local usado:
-
-```text
-C:\sqlite\sqlite3.exe
-```
-
-Banco de producao:
-
-```text
-PostgreSQL via DATABASE_URL
-```
-
-Rotas atuais:
-
-```text
-POST   /api/auth/login
-GET    /api/products
-GET    /api/admin-products
-POST   /api/products
-PUT    /api/products/:id
-DELETE /api/products/:id
-DELETE /api/admin-products
-GET    /api/orders
-POST   /api/orders
-PATCH  /api/orders/:id
-GET    /api/sales-summary
-GET    /api/settings
-PATCH  /api/settings
-GET    /api/payment-agreements
-POST   /api/payment-agreements
-DELETE /api/payment-agreements/:id
-PATCH  /api/payment-installments
-```
-
-As rotas administrativas exigem token de login.
-
-## Arquivos Antigos
-
-As pastas antigas ficam dentro de `archive/` para nao misturar com a loja atual:
-
-```text
-archive/legacy-node-version/
-archive/roseli-projeto-original/
-```
-
-`archive/legacy-node-version/` guarda uma versao antiga da loja que ainda esta versionada.
-
-`archive/roseli-projeto-original/` guarda a copia original do controle de pagamentos Roseli. Ela fica ignorada no Git porque contem um `.git` interno e nao deve ir para o deploy.
-
-A versao principal agora usa:
-
-```text
-index.html
-assets/
-pages/
-backend/
-package.json
-README.md
-```
-
-## O Que Falta Para Virar Loja Completa
-
-### Essencial
-
-- Calculo real de frete.
-- Baixa automatica e rigorosa de estoque apos pedido.
-- Variacoes avancadas por combinacao, exemplo: Scarpin nude 35 = 2 unidades.
-- Melhor validacao dos dados do cliente.
-
-### Pagamento
-
-- Integracao com Mercado Pago, Stripe, PagSeguro ou outro gateway.
-- Pagamento via Pix.
-- Confirmacao automatica de pagamento.
-- Webhook para atualizar pedido quando o pagamento for aprovado.
-
-Isso ficou como etapa futura porque agora a loja finaliza pelo WhatsApp. Para pagamento automatico dentro do site, depende de criar conta no gateway escolhido e configurar chaves de API.
-
-### Banco E Backend
-
-- Criar tabelas SQL para clientes e estoque.
-- Validar dados recebidos pela API.
-- Evitar produtos duplicados.
-- Salvar imagens de forma mais adequada.
-- Remover dependencias de `localStorage` para dados importantes.
-- Criar migrations do banco.
-
-### Admin
-
-- Remover produto com confirmacao.
-- Relatorio por periodo.
-- Buscar e filtrar pedidos.
-
-### Loja
-
-- Busca mais completa.
-- Filtros por tamanho, preco, cor e promocao.
-- Melhor tratamento de fotos.
-
-### Producao
-
-- Hospedar o site e backend.
-- Usar HTTPS.
-- Configurar dominio.
-- Backup do banco.
-- Variaveis de ambiente.
-- Logs de erro.
-- Migrar para PostgreSQL se a loja crescer muito.
-
-### Controle De Pagamentos Parcelados
-
-Pagina:
-
-```text
-pages/parcelados.html
-```
-
-Arquivos:
-
-```text
-assets/css/parcelados.css
-assets/js/parcelados.js
-```
-
-O controle de pagamentos usa o mesmo backend da loja e o mesmo login admin.
-
-Quando um pedido e criado na loja, o backend tambem cria automaticamente uma venda no controle de pagamentos com 1 parcela. Depois, no controle de pagamentos, voce pode editar essa venda e dividir em mais parcelas se necessario.
+Este projeto atualmente prioriza venda assistida pelo WhatsApp. Isso reduz custo e complexidade no inicio, mantendo a loja pronta para evoluir para pagamento online depois.

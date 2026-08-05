@@ -5,3 +5,4 @@ backend/store.sqlite
 backend/db.json
 *.log
 archive/roseli-projeto-original/
+INSTRUCOES_DE_EDICAO_LOCAL.md
