@@ -1,11 +1,7 @@
+﻿// ============================================================
+//  CONTROLE DE PARCELADOS
+//  Dados salvos no backend da loja.
 // ============================================================
-//  CONTROLE DE PARCELADOS - app.js
-//  Dados salvos em Google Sheets via Apps Script.
-// ============================================================
-
-// Crie um arquivo local em assets/js/parcelados.config.js com:
-// window.PARCELADOS_CONFIG = { appsScriptUrl: "SUA_URL_DO_APPS_SCRIPT" };
-const APPS_SCRIPT_URL = window.PARCELADOS_CONFIG?.appsScriptUrl || "";
 
 const AUTH_TOKEN_KEY = 'parcelados_auth_token';
 const STATUS_FUNIL = ['Em dia', 'Vence hoje', 'Atrasado', 'Quitado', 'Cancelado'];
@@ -105,69 +101,66 @@ function aplicarDados(data) {
 }
 
 async function apiRequest(payload = { action: 'listar' }) {
-  validarApiConfigurada();
-
-  if (payload.action === 'login') return jsonpRequest(payload);
+  if (payload.action === 'login') {
+    const response = await fetch(window.kvApiUrl('/api/auth/login'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user: payload.email, password: payload.password }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Nao foi possivel entrar.');
+    return { ok: true, token: data.token };
+  }
 
   const token = obterToken();
-  if (!token) throw new Error('Faça login para continuar.');
+  if (!token) throw new Error('Faca login para continuar.');
 
-  payload = { ...payload, token };
-  if (payload.action === 'listar') return jsonpRequest(payload);
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  };
 
-  await fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    body: JSON.stringify(payload),
-  });
-
-  return jsonpRequest({ action: 'listar', token });
-}
-
-function validarApiConfigurada() {
-  if (!APPS_SCRIPT_URL) {
-    throw new Error('Configure a constante APPS_SCRIPT_URL no app.js com a URL do Web App do Apps Script.');
+  if (payload.action === 'listar') {
+    const response = await fetch(window.kvApiUrl('/api/payment-agreements'), { headers });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Nao foi possivel carregar os pagamentos.');
+    return data;
   }
-}
 
-function jsonpRequest(payload) {
-  return new Promise((resolve, reject) => {
-    const callbackName = `parceladosCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    const script = document.createElement('script');
-    const timeout = window.setTimeout(() => {
-      cleanup();
-      reject(new Error('Tempo esgotado ao carregar dados do Apps Script.'));
-    }, 15000);
-
-    function cleanup() {
-      window.clearTimeout(timeout);
-      delete window[callbackName];
-      script.remove();
-    }
-
-    window[callbackName] = data => {
-      cleanup();
-      if (!data.ok) {
-        reject(new Error(data.error || 'Erro desconhecido na API.'));
-        return;
-      }
-      resolve(data);
-    };
-
-    const url = new URL(APPS_SCRIPT_URL);
-    url.searchParams.set('callback', callbackName);
-    Object.entries(payload).forEach(([key, value]) => {
-      url.searchParams.set(key, typeof value === 'object' ? JSON.stringify(value) : value);
+  if (payload.action === 'salvarAcordo') {
+    const response = await fetch(window.kvApiUrl('/api/payment-agreements'), {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ acordo: payload.acordo }),
     });
-    script.onerror = () => {
-      cleanup();
-      reject(new Error('Não foi possível conectar ao Apps Script.'));
-    };
-    script.src = url.toString();
-    document.body.appendChild(script);
-  });
-}
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Nao foi possivel salvar a venda.');
+    return data;
+  }
 
+  if (payload.action === 'excluirAcordo') {
+    const response = await fetch(window.kvApiUrl(`/api/payment-agreements/${encodeURIComponent(payload.id)}`), {
+      method: 'DELETE',
+      headers,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Nao foi possivel excluir a venda.');
+    return data;
+  }
+
+  if (payload.action === 'atualizarParcela') {
+    const response = await fetch(window.kvApiUrl('/api/payment-installments'), {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify({ parcela: payload.parcela }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Nao foi possivel atualizar a parcela.');
+    return data;
+  }
+
+  throw new Error('Acao invalida.');
+}
 async function carregarDados() {
   if (!obterToken()) {
     mostrarTela('login');
@@ -215,7 +208,7 @@ function sair() {
   acordos = [];
   parcelas = [];
   mostrarTela('login');
-  mostrarNotificacao('Sessão encerrada.');
+  mostrarNotificacao('SessÃ£o encerrada.');
 }
 
 function parcelasDoAcordo(acordoId) {
@@ -297,7 +290,7 @@ function renderDashboard() {
 
   dashboard.innerHTML = [
     ['A receber', formatarMoeda(somaParcelas(abertas))],
-    ['Vence no mês', formatarMoeda(somaParcelas(venceMes))],
+    ['Vence no mÃªs', formatarMoeda(somaParcelas(venceMes))],
     ['Atrasadas', atrasadas.length],
     ['Vencem hoje', hojeLista.length],
     ['Vendas ativas', ativos],
@@ -354,11 +347,11 @@ function renderAcordoCard(acordo) {
       <div class="card-nome">${escapeHtml(acordo.nome)}</div>
       <span class="badge-status ${badgeClass(status)}">${status}</span>
     </div>
-    <div class="card-produto">${escapeHtml(acordo.produto || 'Sem peças informadas')}</div>
+    <div class="card-produto">${escapeHtml(acordo.produto || 'Sem peÃ§as informadas')}</div>
     <div class="card-tags">${tags.map(tag => `<span class="card-tag">${escapeHtml(tag)}</span>`).join('')}</div>
     <div class="card-rodape">
       <div class="card-meta">
-        <div>${aberta ? `Próxima: ${formatarData(aberta.vencimento)} · ${formatarMoeda(aberta.valor)}` : 'Sem parcelas abertas'}</div>
+        <div>${aberta ? `PrÃ³xima: ${formatarData(aberta.vencimento)} Â· ${formatarMoeda(aberta.valor)}` : 'Sem parcelas abertas'}</div>
         <div>Restante: ${formatarMoeda(somaParcelas(parcelasAbertas(acordo.id)))}</div>
       </div>
       <div class="card-acoes">
@@ -390,8 +383,8 @@ function renderHoje() {
   if (lista.length === 0) {
     container.innerHTML = `
       <div class="lista-vazia">
-        <div class="lista-vazia-icon">✓</div>
-        <p>Nenhuma cobrança pendente para hoje.</p>
+        <div class="lista-vazia-icon">âœ“</div>
+        <p>Nenhuma cobranÃ§a pendente para hoje.</p>
       </div>
     `;
     return;
@@ -420,8 +413,8 @@ function renderFunil() {
       card.className = 'funil-card';
       card.innerHTML = `
         <strong>${escapeHtml(acordo.nome)}</strong>
-        <span>${escapeHtml(acordo.produto || 'Sem peças')}</span>
-        <span>${aberta ? `${formatarData(aberta.vencimento)} · ${formatarMoeda(aberta.valor)}` : 'Sem parcela aberta'}</span>
+        <span>${escapeHtml(acordo.produto || 'Sem peÃ§as')}</span>
+        <span>${aberta ? `${formatarData(aberta.vencimento)} Â· ${formatarMoeda(aberta.valor)}` : 'Sem parcela aberta'}</span>
       `;
       card.addEventListener('click', () => abrirDetalhe(acordo.id));
       coluna.appendChild(card);
@@ -536,7 +529,7 @@ function atualizarPreviewParcela() {
   const saldo = Math.max(valorTotal - entrada, 0);
   const valorParcela = saldo / total;
   document.getElementById('preview-parcela').textContent =
-    `${total} parcela(s) de ${formatarMoeda(valorParcela)} · saldo parcelado ${formatarMoeda(saldo)}`;
+    `${total} parcela(s) de ${formatarMoeda(valorParcela)} Â· saldo parcelado ${formatarMoeda(saldo)}`;
 }
 
 async function salvarAcordo() {
@@ -575,7 +568,7 @@ async function excluirAcordo() {
     aplicarDados(await apiRequest({ action: 'excluirAcordo', id }));
     renderHome();
     mostrarTela('lista');
-    mostrarNotificacao('Venda excluída com sucesso.');
+    mostrarNotificacao('Venda excluÃ­da com sucesso.');
   } catch (error) {
     console.error(error);
     mostrarNotificacao(error.message, 'erro');
@@ -602,8 +595,8 @@ function renderDetalhe() {
   const ps = parcelasDoAcordo(acordo.id).sort((a, b) => Number(a.numero) - Number(b.numero));
   const abertas = ps.filter(parcela => parcela.status !== 'Pago');
   info.innerHTML = `
-    <div>${escapeHtml(acordo.produto || 'Sem peças informadas')} · ${statusCalculado(acordo)}</div>
-    <div>Total: ${formatarMoeda(acordo.valorTotal)} · Restante: ${formatarMoeda(somaParcelas(abertas))}</div>
+    <div>${escapeHtml(acordo.produto || 'Sem peÃ§as informadas')} Â· ${statusCalculado(acordo)}</div>
+    <div>Total: ${formatarMoeda(acordo.valorTotal)} Â· Restante: ${formatarMoeda(somaParcelas(abertas))}</div>
     <div><button class="btn-card-mini" id="btn-editar-acordo">Editar venda</button></div>
   `;
   info.querySelector('#btn-editar-acordo').addEventListener('click', () => abrirEdicao(acordo.id));
@@ -626,7 +619,7 @@ function renderParcelaCard(acordo, parcela) {
       </span>
     </div>
     <div class="parcela-meta">
-      <div>Vencimento: ${formatarData(parcela.vencimento)} · ${formatarMoeda(parcela.valor)}</div>
+      <div>Vencimento: ${formatarData(parcela.vencimento)} Â· ${formatarMoeda(parcela.valor)}</div>
       ${paga ? `<div>Pago em: ${formatarData(parcela.pagoEm)}</div>` : ''}
     </div>
     <div class="parcela-acoes">
@@ -658,9 +651,9 @@ async function alternarParcela(parcela) {
 }
 
 function mensagemCobranca(acordo, parcela) {
-  if (!parcela) return `Olá, ${acordo.nome.split(' ')[0]}! Tudo bem? Passando sobre as parcelas da sua compra.`;
+  if (!parcela) return `OlÃ¡, ${acordo.nome.split(' ')[0]}! Tudo bem? Passando sobre as parcelas da sua compra.`;
   const nome = acordo.nome.split(' ')[0] || 'tudo bem';
-  return `Olá, ${nome}! Tudo bem? Passando para lembrar da parcela ${parcela.numero} da sua compra (${formatarMoeda(parcela.valor)}), com vencimento em ${formatarData(parcela.vencimento)}.`;
+  return `OlÃ¡, ${nome}! Tudo bem? Passando para lembrar da parcela ${parcela.numero} da sua compra (${formatarMoeda(parcela.valor)}), com vencimento em ${formatarData(parcela.vencimento)}.`;
 }
 
 document.getElementById('btn-login').addEventListener('click', fazerLogin);
@@ -704,3 +697,4 @@ document.getElementById('busca').addEventListener('input', e => {
 ].forEach(id => document.getElementById(id).addEventListener('input', atualizarPreviewParcela));
 
 carregarDados();
+

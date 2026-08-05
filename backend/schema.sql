@@ -44,3 +44,34 @@ CREATE TABLE IF NOT EXISTS store_settings (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS payment_agreements (
+  id TEXT PRIMARY KEY,
+  order_id TEXT,
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,
+  customer_email TEXT,
+  product_summary TEXT,
+  total_value REAL NOT NULL,
+  down_payment REAL NOT NULL DEFAULT 0,
+  total_installments INTEGER NOT NULL DEFAULT 1,
+  installment_value REAL NOT NULL,
+  first_due_date TEXT NOT NULL,
+  payment_method TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'Ativo',
+  notes TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS payment_installments (
+  id TEXT PRIMARY KEY,
+  agreement_id TEXT NOT NULL,
+  number INTEGER NOT NULL,
+  due_date TEXT NOT NULL,
+  value REAL NOT NULL,
+  status TEXT NOT NULL DEFAULT 'Aberto',
+  paid_at TEXT,
+  notes TEXT,
+  FOREIGN KEY (agreement_id) REFERENCES payment_agreements(id) ON DELETE CASCADE
+);

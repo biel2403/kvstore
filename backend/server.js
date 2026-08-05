@@ -108,6 +108,306 @@ async function updateStoreSettings(payload) {
   return readStoreSettings();
 }
 
+function todayIso() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function addMonths(iso, months) {
+  const [year, month, day] = String(iso || todayIso()).split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  const originalDay = date.getDate();
+  date.setMonth(date.getMonth() + months);
+  if (date.getDate() !== originalDay) date.setDate(0);
+  const nextYear = date.getFullYear();
+  const nextMonth = String(date.getMonth() + 1).padStart(2, "0");
+  const nextDay = String(date.getDate()).padStart(2, "0");
+  return `${nextYear}-${nextMonth}-${nextDay}`;
+}
+
+function agreementFromRow(row) {
+  return {
+    id: row.id,
+    orderId: row.order_id || "",
+    nome: row.customer_name,
+    whatsapp: row.customer_phone,
+    email: row.customer_email || "",
+    produto: row.product_summary || "",
+    valorTotal: Number(row.total_value).toFixed(2),
+    entrada: Number(row.down_payment || 0).toFixed(2),
+    totalParcelas: String(row.total_installments || 1),
+    valorParcela: Number(row.installment_value || 0).toFixed(2),
+    primeiroVencimento: row.first_due_date,
+    formaPagamento: row.payment_method,
+    status: row.status,
+    obs: row.notes || "",
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
+function installmentFromRow(row) {
+  return {
+    id: row.id,
+    clienteId: row.agreement_id,
+    numero: String(row.number),
+    vencimento: row.due_date,
+    valor: Number(row.value).toFixed(2),
+    status: row.status,
+    pagoEm: row.paid_at || "",
+    obs: row.notes || ""
+  };
+}
+
+async function readPaymentData() {
+  const agreementRows = USE_POSTGRES
+    ? await pgQuery(`
+      SELECT id, order_id, customer_name, customer_phone, customer_email, product_summary,
+             total_value, down_payment, total_installments, installment_value, first_due_date,
+             payment_method, status, notes, created_at, updated_at
+      FROM payment_agreements
+      ORDER BY created_at DESC;
+    `)
+    : query(`
+      SELECT id, order_id, customer_name, customer_phone, customer_email, product_summary,
+             total_value, down_payment, total_installments, installment_value, first_due_date,
+             payment_method, status, notes, created_at, updated_at
+      FROM payment_agreements
+      ORDER BY created_at DESC;
+    `);
+
+  const installmentRows = USE_POSTGRES
+    ? await pgQuery(`
+      SELECT id, agreement_id, number, due_date, value, status, paid_at, notes
+      FROM payment_installments
+      ORDER BY agreement_id, number ASC;
+    `)
+    : query(`
+      SELECT id, agreement_id, number, due_date, value, status, paid_at, notes
+      FROM payment_installments
+      ORDER BY agreement_id, number ASC;
+    `);
+
+  return {
+    ok: true,
+    acordos: agreementRows.map(agreementFromRow),
+    parcelas: installmentRows.map(installmentFromRow)
+  };
+}
+
+function normalizePaymentAgreement(payload) {
+  const totalValue = Number(String(payload.valorTotal || payload.totalValue || 0).replace(",", "."));
+  const downPayment = Number(String(payload.entrada || payload.downPayment || 0).replace(",", "."));
+  const totalInstallments = Math.max(1, Number(payload.totalParcelas || payload.totalInstallments || 1));
+  const balance = Math.max(totalValue - downPayment, 0);
+  const installmentValue = Number((balance / totalInstallments).toFixed(2));
+  const id = String(payload.id || `PAY-${Date.now()}`);
+  const firstDueDate = String(payload.primeiroVencimento || payload.firstDueDate || todayIso());
+
+  return {
+    id,
+    orderId: String(payload.orderId || payload.order_id || ""),
+    customerName: String(payload.nome || payload.customerName || "").trim(),
+    customerPhone: String(payload.whatsapp || payload.customerPhone || "").trim(),
+    customerEmail: String(payload.email || payload.customerEmail || "").trim(),
+    productSummary: String(payload.produto || payload.productSummary || "").trim(),
+    totalValue,
+    downPayment,
+    totalInstallments,
+    installmentValue,
+    firstDueDate,
+    paymentMethod: String(payload.formaPagamento || payload.paymentMethod || "Pix"),
+    status: String(payload.status || "Ativo"),
+    notes: String(payload.obs || payload.notes || "").trim()
+  };
+}
+
+function generatePaymentInstallments(agreement) {
+  return Array.from({ length: agreement.totalInstallments }, (_, index) => ({
+    id: `${agreement.id}-${index + 1}`,
+    agreementId: agreement.id,
+    number: index + 1,
+    dueDate: addMonths(agreement.firstDueDate, index),
+    value: agreement.installmentValue,
+    status: "Aberto",
+    paidAt: "",
+    notes: ""
+  }));
+}
+
+async function savePaymentAgreement(payload) {
+  const agreement = normalizePaymentAgreement(payload);
+  if (!agreement.customerName) throw new Error("Nome da cliente e obrigatorio.");
+  if (!agreement.customerPhone) throw new Error("WhatsApp da cliente e obrigatorio.");
+  if (!agreement.totalValue) throw new Error("Valor da compra e obrigatorio.");
+
+  const installments = generatePaymentInstallments(agreement);
+
+  if (USE_POSTGRES) {
+    const client = await pgPool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query("DELETE FROM payment_installments WHERE agreement_id = $1;", [agreement.id]);
+      await client.query(`
+        INSERT INTO payment_agreements (
+          id, order_id, customer_name, customer_phone, customer_email, product_summary,
+          total_value, down_payment, total_installments, installment_value, first_due_date,
+          payment_method, status, notes, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())
+        ON CONFLICT (id) DO UPDATE SET
+          order_id = EXCLUDED.order_id,
+          customer_name = EXCLUDED.customer_name,
+          customer_phone = EXCLUDED.customer_phone,
+          customer_email = EXCLUDED.customer_email,
+          product_summary = EXCLUDED.product_summary,
+          total_value = EXCLUDED.total_value,
+          down_payment = EXCLUDED.down_payment,
+          total_installments = EXCLUDED.total_installments,
+          installment_value = EXCLUDED.installment_value,
+          first_due_date = EXCLUDED.first_due_date,
+          payment_method = EXCLUDED.payment_method,
+          status = EXCLUDED.status,
+          notes = EXCLUDED.notes,
+          updated_at = NOW();
+      `, [
+        agreement.id,
+        agreement.orderId,
+        agreement.customerName,
+        agreement.customerPhone,
+        agreement.customerEmail,
+        agreement.productSummary,
+        agreement.totalValue,
+        agreement.downPayment,
+        agreement.totalInstallments,
+        agreement.installmentValue,
+        agreement.firstDueDate,
+        agreement.paymentMethod,
+        agreement.status,
+        agreement.notes
+      ]);
+
+      for (const installment of installments) {
+        await client.query(`
+          INSERT INTO payment_installments (id, agreement_id, number, due_date, value, status, paid_at, notes)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+        `, [installment.id, installment.agreementId, installment.number, installment.dueDate, installment.value, installment.status, installment.paidAt, installment.notes]);
+      }
+
+      await client.query("COMMIT");
+      return readPaymentData();
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  execute([
+    "BEGIN;",
+    `DELETE FROM payment_installments WHERE agreement_id = ${sqlValue(agreement.id)};`,
+    `INSERT OR REPLACE INTO payment_agreements (
+      id, order_id, customer_name, customer_phone, customer_email, product_summary,
+      total_value, down_payment, total_installments, installment_value, first_due_date,
+      payment_method, status, notes, updated_at
+    ) VALUES (
+      ${sqlValue(agreement.id)},
+      ${sqlValue(agreement.orderId)},
+      ${sqlValue(agreement.customerName)},
+      ${sqlValue(agreement.customerPhone)},
+      ${sqlValue(agreement.customerEmail)},
+      ${sqlValue(agreement.productSummary)},
+      ${sqlValue(agreement.totalValue)},
+      ${sqlValue(agreement.downPayment)},
+      ${sqlValue(agreement.totalInstallments)},
+      ${sqlValue(agreement.installmentValue)},
+      ${sqlValue(agreement.firstDueDate)},
+      ${sqlValue(agreement.paymentMethod)},
+      ${sqlValue(agreement.status)},
+      ${sqlValue(agreement.notes)},
+      CURRENT_TIMESTAMP
+    );`,
+    ...installments.map(installment => `
+      INSERT INTO payment_installments (id, agreement_id, number, due_date, value, status, paid_at, notes)
+      VALUES (
+        ${sqlValue(installment.id)},
+        ${sqlValue(installment.agreementId)},
+        ${sqlValue(installment.number)},
+        ${sqlValue(installment.dueDate)},
+        ${sqlValue(installment.value)},
+        ${sqlValue(installment.status)},
+        ${sqlValue(installment.paidAt)},
+        ${sqlValue(installment.notes)}
+      );
+    `),
+    "COMMIT;"
+  ].join("\n"));
+
+  return readPaymentData();
+}
+
+async function deletePaymentAgreement(id) {
+  if (USE_POSTGRES) {
+    await pgQuery("DELETE FROM payment_agreements WHERE id = $1;", [id]);
+  } else {
+    execute(`DELETE FROM payment_agreements WHERE id = ${sqlValue(id)};`);
+  }
+  return readPaymentData();
+}
+
+async function updatePaymentInstallment(payload) {
+  const installment = {
+    id: String(payload.id || ""),
+    status: String(payload.status || "Aberto"),
+    paidAt: String(payload.pagoEm || payload.paidAt || ""),
+    notes: String(payload.obs || payload.notes || "")
+  };
+
+  if (!installment.id) throw new Error("Parcela invalida.");
+
+  if (USE_POSTGRES) {
+    await pgQuery(`
+      UPDATE payment_installments
+      SET status = $1, paid_at = $2, notes = $3
+      WHERE id = $4;
+    `, [installment.status, installment.paidAt, installment.notes, installment.id]);
+  } else {
+    execute(`
+      UPDATE payment_installments
+      SET status = ${sqlValue(installment.status)},
+          paid_at = ${sqlValue(installment.paidAt)},
+          notes = ${sqlValue(installment.notes)}
+      WHERE id = ${sqlValue(installment.id)};
+    `);
+  }
+
+  return readPaymentData();
+}
+
+async function createPaymentAgreementFromOrder(order) {
+  const productSummary = order.items.map(item => `${item.quantity}x ${item.name}`).join(", ");
+  const agreement = {
+    id: `PAY-${order.id}`,
+    orderId: order.id,
+    nome: order.customer.name,
+    whatsapp: order.customer.phone,
+    email: order.customer.email,
+    produto: productSummary || `Pedido ${order.id}`,
+    valorTotal: order.total,
+    entrada: 0,
+    totalParcelas: 1,
+    primeiroVencimento: todayIso(),
+    formaPagamento: order.paymentMethod,
+    status: "Ativo",
+    obs: `Criado automaticamente pelo pedido ${order.id}.`
+  };
+
+  await savePaymentAgreement(agreement);
+}
+
 function productFromRow(row) {
   const product = {
     id: Number(row.id),
@@ -693,6 +993,7 @@ async function handleApi(req, res, url) {
     if (error) return sendJson(res, 400, { error });
 
     await insertOrder(order);
+    await createPaymentAgreementFromOrder(order);
     return sendJson(res, 201, order);
   }
 
@@ -717,6 +1018,37 @@ async function handleApi(req, res, url) {
     await deleteAdminProduct(id);
     const after = (await readAdminProducts()).length;
     return sendJson(res, before === after ? 404 : 200, { ok: before !== after });
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/payment-agreements") {
+    if (!requireAdmin(req, res)) return;
+    return sendJson(res, 200, await readPaymentData());
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/payment-agreements") {
+    if (!requireAdmin(req, res)) return;
+    try {
+      const payload = await parseBody(req);
+      return sendJson(res, 200, await savePaymentAgreement(payload.acordo || payload));
+    } catch (error) {
+      return sendJson(res, 400, { error: error.message });
+    }
+  }
+
+  if (req.method === "DELETE" && url.pathname.startsWith("/api/payment-agreements/")) {
+    if (!requireAdmin(req, res)) return;
+    const id = decodeURIComponent(url.pathname.replace("/api/payment-agreements/", ""));
+    return sendJson(res, 200, await deletePaymentAgreement(id));
+  }
+
+  if (req.method === "PATCH" && url.pathname === "/api/payment-installments") {
+    if (!requireAdmin(req, res)) return;
+    try {
+      const payload = await parseBody(req);
+      return sendJson(res, 200, await updatePaymentInstallment(payload.parcela || payload));
+    } catch (error) {
+      return sendJson(res, 400, { error: error.message });
+    }
   }
 
   return sendJson(res, 404, { error: "Rota nao encontrada." });

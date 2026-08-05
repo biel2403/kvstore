@@ -457,6 +457,10 @@ PATCH  /api/orders/:id
 GET    /api/sales-summary
 GET    /api/settings
 PATCH  /api/settings
+GET    /api/payment-agreements
+POST   /api/payment-agreements
+DELETE /api/payment-agreements/:id
+PATCH  /api/payment-installments
 ```
 
 As rotas administrativas exigem token de login.
@@ -542,29 +546,8 @@ Arquivos:
 ```text
 assets/css/parcelados.css
 assets/js/parcelados.js
-assets/js/parcelados.config.example.js
 ```
 
-Por seguranca, a URL real do Google Apps Script nao fica no GitHub.
+O controle de pagamentos usa o mesmo backend da loja e o mesmo login admin.
 
-Para ativar o controle de pagamentos, crie uma copia local do arquivo:
-
-```text
-assets/js/parcelados.config.example.js
-```
-
-Com o nome:
-
-```text
-assets/js/parcelados.config.js
-```
-
-Depois coloque a URL real:
-
-```js
-window.PARCELADOS_CONFIG = {
-  appsScriptUrl: "https://script.google.com/macros/s/SUA_URL/exec"
-};
-```
-
-Esse arquivo esta no `.gitignore`, entao nao sera enviado para o repositorio.
+Quando um pedido e criado na loja, o backend tambem cria automaticamente uma venda no controle de pagamentos com 1 parcela. Depois, no controle de pagamentos, voce pode editar essa venda e dividir em mais parcelas se necessario.
