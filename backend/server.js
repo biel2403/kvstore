@@ -358,6 +358,24 @@ async function deletePaymentAgreement(id) {
   return readPaymentData();
 }
 
+async function syncPaymentAgreementStatusFromOrder(orderId, orderStatus) {
+  const agreementStatus = orderStatus === "Cancelado" ? "Cancelado" : "Ativo";
+
+  if (USE_POSTGRES) {
+    await pgQuery(
+      "UPDATE payment_agreements SET status = $1, updated_at = NOW() WHERE order_id = $2;",
+      [agreementStatus, orderId]
+    );
+    return;
+  }
+
+  execute(`
+    UPDATE payment_agreements
+    SET status = ${sqlValue(agreementStatus)}, updated_at = CURRENT_TIMESTAMP
+    WHERE order_id = ${sqlValue(orderId)};
+  `);
+}
+
 async function updatePaymentInstallment(payload) {
   const installment = {
     id: String(payload.id || ""),
@@ -747,9 +765,11 @@ async function updateOrderStatus(id, status) {
   const nextStatus = allowed.includes(status) ? status : "Novo pedido";
   if (USE_POSTGRES) {
     await pgQuery("UPDATE orders SET status = $1 WHERE id = $2;", [nextStatus, id]);
-    return;
+  } else {
+    execute(`UPDATE orders SET status = ${sqlValue(nextStatus)} WHERE id = ${sqlValue(id)};`);
   }
-  execute(`UPDATE orders SET status = ${sqlValue(nextStatus)} WHERE id = ${sqlValue(id)};`);
+
+  await syncPaymentAgreementStatusFromOrder(id, nextStatus);
 }
 
 async function salesSummary() {
