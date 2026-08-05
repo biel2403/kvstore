@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Controle de Pagamentos | Vasconcelos</title>
+  <link rel="stylesheet" href="../assets/css/parcelados.css?v=20260510-1" />
+</head>
+<body>
+  <div id="tela-login" class="tela tela-login ativa">
+    <div class="login-decor">
+      <a class="admin-return-link" href="admin.html">Voltar ao admin</a>
+      <div class="login-selo">Vendas parceladas</div>
+      <h1>Controle os recebimentos da loja</h1>
+      <p>Veja parcelas em aberto, atrasos e clientes para cobrar no WhatsApp.</p>
+    </div>
+
+    <div class="login-box">
+      <div>
+        <div class="login-marca">Controle de Parcelas</div>
+        <h2>Acessar painel</h2>
+      </div>
+
+      <div class="campo">
+        <label for="login-email">E-mail</label>
+        <input type="email" id="login-email" autocomplete="username" placeholder="vendedora@loja.com" />
+      </div>
+
+      <div class="campo">
+        <label for="login-senha">Senha</label>
+        <input type="password" id="login-senha" autocomplete="current-password" placeholder="Sua senha" />
+      </div>
+
+      <button class="btn-salvar" id="btn-login">Entrar</button>
+    </div>
+  </div>
+
+  <div id="tela-lista" class="tela">
+    <div class="topbar">
+      <button class="btn-voltar" id="btn-sair">Sair</button>
+      <h1 class="topbar-titulo">Vendas Parceladas</h1>
+      <div class="topbar-actions">
+        <a class="btn-admin-link" href="admin.html" aria-label="Voltar ao admin">Admin</a>
+        <button class="btn-icon" id="btn-abrir-cadastro" aria-label="Nova venda">+</button>
+      </div>
+    </div>
+
+    <div class="busca-wrap">
+      <input type="search" id="busca" class="busca" placeholder="Buscar por cliente, WhatsApp, peça, pedido..." />
+    </div>
+
+    <div class="abas-home">
+      <button class="aba-home ativo" data-view="lista">Lista</button>
+      <button class="aba-home" data-view="hoje">Hoje</button>
+      <button class="aba-home" data-view="funil">Funil</button>
+    </div>
+
+    <div id="dashboard" class="dashboard"></div>
+
+    <div class="filtros">
+      <button class="filtro ativo" data-status="Todos">Todos</button>
+      <button class="filtro" data-status="Em dia">Em dia</button>
+      <button class="filtro" data-status="Vence hoje">Hoje</button>
+      <button class="filtro" data-status="Atrasado">Atrasado</button>
+      <button class="filtro" data-status="Quitado">Quitado</button>
+      <button class="filtro" data-status="Cancelado">Cancelado</button>
+    </div>
+
+    <div id="alerta-banner" class="alerta-banner hidden">
+      <span id="alerta-texto"></span>
+    </div>
+
+    <div id="view-lista" class="home-view ativa">
+      <div id="lista-clientes" class="lista-clientes"></div>
+    </div>
+
+    <div id="view-hoje" class="home-view">
+      <div id="lista-hoje" class="lista-clientes"></div>
+    </div>
+
+    <div id="view-funil" class="home-view">
+      <div id="funil" class="funil"></div>
+    </div>
+
+    <div id="lista-vazia" class="lista-vazia hidden">
+      <div class="lista-vazia-icon">○</div>
+      <p>Nenhuma venda encontrada.</p>
+    </div>
+  </div>
+
+  <div id="tela-cadastro" class="tela">
+    <div class="topbar">
+      <button class="btn-voltar" id="btn-voltar-cadastro">‹ Voltar</button>
+      <h1 class="topbar-titulo" id="titulo-cadastro">Nova venda</h1>
+      <div class="topbar-spacer"></div>
+    </div>
+
+    <div class="form-wrap">
+      <input type="hidden" id="form-id" />
+
+      <div class="campo">
+        <label for="form-nome">Nome completo *</label>
+        <input type="text" id="form-nome" placeholder="Ex: Ana Paula Ferreira" />
+      </div>
+
+      <div class="campo">
+        <label for="form-whatsapp">WhatsApp *</label>
+        <input type="tel" id="form-whatsapp" placeholder="Ex: 11987650001" />
+      </div>
+
+      <div class="campo">
+        <label for="form-email">E-mail</label>
+        <input type="email" id="form-email" placeholder="Ex: ana@email.com" />
+      </div>
+
+      <div class="campo">
+        <label for="form-produto">Pedido / peças</label>
+        <input type="text" id="form-produto" placeholder="Ex: Vestido azul M, calça jeans 38..." />
+      </div>
+
+      <div class="form-grid">
+        <div class="campo">
+          <label for="form-valor-total">Valor da compra *</label>
+          <input type="number" id="form-valor-total" min="0" step="0.01" placeholder="Ex: 1200" />
+        </div>
+
+        <div class="campo">
+          <label for="form-entrada">Entrada / sinal</label>
+          <input type="number" id="form-entrada" min="0" step="0.01" placeholder="Ex: 50" />
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="campo">
+          <label for="form-total-parcelas">Qtd. parcelas *</label>
+          <input type="number" id="form-total-parcelas" min="1" step="1" placeholder="Ex: 5" />
+        </div>
+
+        <div class="campo">
+          <label for="form-primeiro-vencimento">1º vencimento *</label>
+          <input type="date" id="form-primeiro-vencimento" />
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="campo">
+          <label for="form-forma-pagamento">Forma</label>
+          <select id="form-forma-pagamento">
+            <option>Pix</option>
+            <option>Cartão</option>
+            <option>Boleto</option>
+            <option>Dinheiro</option>
+            <option>Transferência</option>
+            <option>Outro</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="form-status">Status</label>
+          <select id="form-status">
+            <option>Ativo</option>
+            <option>Cancelado</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="form-obs">Observações</label>
+        <textarea id="form-obs" rows="3" placeholder="Ex: combinou pagar todo dia 10, retirar na loja..." ></textarea>
+      </div>
+
+      <div class="preview-parcela" id="preview-parcela"></div>
+
+      <button class="btn-salvar" id="btn-salvar">Salvar venda</button>
+      <button class="btn-excluir hidden" id="btn-excluir">Excluir venda</button>
+    </div>
+  </div>
+
+  <div id="tela-detalhe" class="tela">
+    <div class="topbar">
+      <button class="btn-voltar" id="btn-voltar-detalhe">‹ Voltar</button>
+      <h1 class="topbar-titulo" id="titulo-detalhe">Parcelas</h1>
+      <div class="topbar-spacer"></div>
+    </div>
+
+    <div id="detalhe-info" class="detalhe-info"></div>
+    <div id="lista-parcelas" class="lista-parcelas"></div>
+  </div>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <script src="../assets/js/parcelados.js?v=20260510-1"></script>
+</body>
+</html>

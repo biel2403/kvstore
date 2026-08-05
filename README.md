@@ -22,6 +22,7 @@ O projeto ja tem:
 - Tela admin para criar anuncio de produto.
 - Opcao no admin para ocultar/mostrar anuncios ficticios da vitrine.
 - Aba de anuncios ativos no admin, com anuncios reais e ficticios organizados por status.
+- Acesso pelo admin ao controle de pagamentos parcelados.
 - Upload/preview de foto no admin.
 - Login no admin.
 - Protecao das rotas administrativas no backend.
@@ -171,6 +172,7 @@ Projeto Loj/
 |   |-- admin.html
 |   |-- categoria.html
 |   |-- contato.html
+|   |-- parcelados.html
 |   |-- produto.html
 |   |-- sucesso.html
 |   `-- trocas.html

@@ -4,3 +4,4 @@ node_modules/
 backend/store.sqlite
 backend/db.json
 *.log
+Roseli projeto/
