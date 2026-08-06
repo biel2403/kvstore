@@ -173,13 +173,25 @@
             </label>
             <label>
               Pagamento
-              <select name="paymentMethod">
+              <select name="paymentMethod" id="paymentMethod">
                 <option>Pix</option>
                 <option>Cartao</option>
                 <option>Dinheiro</option>
               </select>
             </label>
           </div>
+          <label class="installments-field is-hidden" id="installmentsField">
+            Parcelas no cartao
+            <select name="installments" id="installmentsSelect">
+              <option value="">Selecione</option>
+              <option value="2">2x</option>
+              <option value="3">3x</option>
+              <option value="4">4x</option>
+              <option value="5">5x</option>
+              <option value="6">6x</option>
+            </select>
+            <span class="field-hint" id="installmentsHint">Disponivel para compras acima de R$ 200,00.</span>
+          </label>
           <button class="btn btn-primary full-width whatsapp-checkout-btn" type="submit">Finalizar pelo WhatsApp</button>
           <p class="form-message checkout-message" id="checkoutMessage" role="status"></p>
         </form>

@@ -35,6 +35,7 @@ let cart = JSON.parse(localStorage.getItem("fashionCart")) || [];
 
 function saveCart() {
   localStorage.setItem("fashionCart", JSON.stringify(cart));
+  document.dispatchEvent(new CustomEvent("cart:updated"));
 }
 
 function categoryLabel(category) {

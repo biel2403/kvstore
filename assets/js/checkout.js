@@ -1,8 +1,13 @@
 const checkoutForm = document.querySelector("#checkoutForm");
 const checkoutMessage = document.querySelector("#checkoutMessage");
+const paymentMethodSelect = document.querySelector("#paymentMethod");
+const installmentsField = document.querySelector("#installmentsField");
+const installmentsSelect = document.querySelector("#installmentsSelect");
+const installmentsHint = document.querySelector("#installmentsHint");
 const checkoutConfig = window.KV_STORE_CONFIG || {};
 const storeWhatsappNumber = checkoutConfig.whatsappNumber || "5500000000000";
 const storeName = checkoutConfig.storeName || "Vasconcelos";
+const MIN_INSTALLMENT_TOTAL = 200;
 
 function checkoutHasBackend() {
   return window.kvHasBackend ? window.kvHasBackend() : window.location.protocol.startsWith("http");
@@ -41,8 +46,45 @@ function enrichLocalOrder(order) {
     subtotal,
     shipping,
     total: Number((subtotal + shipping).toFixed(2)),
+    installments: normalizeInstallments(order.paymentMethod, order.installments, Number((subtotal + shipping).toFixed(2))),
     items
   };
+}
+
+function calculateCheckoutTotal() {
+  const cart = readCheckoutCart();
+  const subtotal = cart.reduce((sum, item) => {
+    const quantity = Math.max(1, Number(item.quantity || 1));
+    return sum + Number(item.price || item.unitPrice || 0) * quantity;
+  }, 0);
+  const shipping = subtotal > 0 && subtotal < 299 ? 19.9 : 0;
+  return Number((subtotal + shipping).toFixed(2));
+}
+
+function normalizeInstallments(paymentMethod, installments, total) {
+  const isCard = String(paymentMethod || "") === "Cartao";
+  const canInstall = isCard && Number(total || 0) >= MIN_INSTALLMENT_TOTAL;
+  if (!canInstall) return 1;
+  const selected = Number(installments || 0);
+  return Math.min(6, Math.max(2, selected || 2));
+}
+
+function updateInstallmentsVisibility() {
+  if (!paymentMethodSelect || !installmentsField || !installmentsSelect) return;
+  const total = calculateCheckoutTotal();
+  const isCard = paymentMethodSelect.value === "Cartao";
+  const canInstall = isCard && total >= MIN_INSTALLMENT_TOTAL;
+
+  installmentsField.classList.toggle("is-hidden", !isCard);
+  installmentsSelect.required = canInstall;
+  installmentsSelect.disabled = !canInstall;
+  if (!canInstall) installmentsSelect.value = "";
+
+  if (installmentsHint) {
+    installmentsHint.textContent = isCard && total < MIN_INSTALLMENT_TOTAL
+      ? `Parcelamento disponivel a partir de ${checkoutMoney(MIN_INSTALLMENT_TOTAL)}.`
+      : `Disponivel para compras acima de ${checkoutMoney(MIN_INSTALLMENT_TOTAL)}.`;
+  }
 }
 
 function checkoutMoney(value) {
@@ -79,7 +121,7 @@ function buildWhatsappMessage(order) {
     order.customer.email ? `Email: ${order.customer.email}` : null,
     `Entrega: ${order.deliveryMethod}`,
     order.customer.address ? `Endereco: ${order.customer.address}` : null,
-    `Pagamento desejado: ${order.paymentMethod}`
+    `Pagamento desejado: ${order.paymentMethod}${Number(order.installments || 1) > 1 ? ` em ${order.installments}x` : ""}`
   ].filter(Boolean).join("\n");
 }
 
@@ -121,6 +163,7 @@ if (checkoutForm) {
       customer: Object.fromEntries(formData.entries()),
       deliveryMethod: formData.get("deliveryMethod"),
       paymentMethod: formData.get("paymentMethod"),
+      installments: normalizeInstallments(formData.get("paymentMethod"), formData.get("installments"), calculateCheckoutTotal()),
       items: cart
     };
 
@@ -132,6 +175,7 @@ if (checkoutForm) {
       const created = await createOrder(order);
       localStorage.removeItem("fashionCart");
       checkoutForm.reset();
+      updateInstallmentsVisibility();
       checkoutMessage.textContent = `Pedido ${created.id} criado. Abrindo WhatsApp...`;
       const whatsappUrl = buildWhatsappUrl(created);
       if (whatsappWindow) {
@@ -149,4 +193,10 @@ if (checkoutForm) {
       checkoutMessage.textContent = error.message;
     }
   });
+
+  paymentMethodSelect?.addEventListener("change", updateInstallmentsVisibility);
+  installmentsSelect?.addEventListener("change", updateInstallmentsVisibility);
+  document.addEventListener("cart:updated", updateInstallmentsVisibility);
+  window.addEventListener("storage", updateInstallmentsVisibility);
+  updateInstallmentsVisibility();
 }

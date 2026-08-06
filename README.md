@@ -13,6 +13,7 @@ O projeto foi pensado para uma loja pequena ou media que quer comecar a vender o
 - Carrinho lateral com persistencia no navegador.
 - Checkout com dados do cliente.
 - Finalizacao pelo WhatsApp com mensagem pronta.
+- Parcelamento no cartao para compras acima de R$ 200.
 - Painel administrativo com login.
 - Cadastro, edicao e remocao de anuncios.
 - Aba de anuncios ativos, incluindo produtos ficticios e produtos cadastrados.
@@ -94,6 +95,8 @@ Em producao, esses dados devem ser configurados por variaveis de ambiente no Ren
 7. O controle de pagamentos recebe automaticamente uma venda relacionada ao pedido.
 
 Se o pedido for cancelado no admin, o pagamento vinculado tambem fica marcado como cancelado.
+
+Quando a cliente escolhe pagamento no cartao em uma compra acima de R$ 200, ela pode selecionar de 2x a 6x. O controle de pagamentos ja recebe esse pedido dividido na quantidade escolhida.
 
 ## Estrutura Do Projeto
 

@@ -17,6 +17,8 @@ const DATABASE_URL = process.env.DATABASE_URL || "";
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "1234";
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || "kv-admin-local-token";
+const MIN_INSTALLMENT_TOTAL = 200;
+const MAX_ORDER_INSTALLMENTS = 6;
 const USE_POSTGRES = Boolean(DATABASE_URL);
 const pgPool = USE_POSTGRES
   ? new Pool({
@@ -499,6 +501,7 @@ async function updatePaymentInstallment(payload) {
 
 async function createPaymentAgreementFromOrder(order) {
   const productSummary = order.items.map(item => `${item.quantity}x ${item.name}`).join(", ");
+  const installments = Math.min(MAX_ORDER_INSTALLMENTS, Math.max(1, Number(order.installments || 1)));
   const agreement = {
     id: `PAY-${order.id}`,
     orderId: order.id,
@@ -508,11 +511,13 @@ async function createPaymentAgreementFromOrder(order) {
     produto: productSummary || `Pedido ${order.id}`,
     valorTotal: order.total,
     entrada: 0,
-    totalParcelas: 1,
+    totalParcelas: installments,
     primeiroVencimento: todayIso(),
-    formaPagamento: order.paymentMethod,
+    formaPagamento: installments > 1 ? `${order.paymentMethod} (${installments}x)` : order.paymentMethod,
     status: "Ativo",
-    obs: `Criado automaticamente pelo pedido ${order.id}.`
+    obs: installments > 1
+      ? `Criado automaticamente pelo pedido ${order.id} em ${installments} parcelas.`
+      : `Criado automaticamente pelo pedido ${order.id}.`
   };
 
   await savePaymentAgreement(agreement);
@@ -749,6 +754,13 @@ async function normalizeOrder(payload) {
 
   const subtotal = Number(items.reduce((sum, item) => sum + item.total, 0).toFixed(2));
   const shipping = subtotal > 0 && subtotal < 299 ? 19.9 : 0;
+  const total = Number((subtotal + shipping).toFixed(2));
+  const paymentMethod = String(payload.paymentMethod || "Pix");
+  const requestedInstallments = Math.floor(Number(payload.installments || 1));
+  const canInstall = paymentMethod === "Cartao" && total >= MIN_INSTALLMENT_TOTAL;
+  const installments = canInstall
+    ? Math.min(MAX_ORDER_INSTALLMENTS, Math.max(2, requestedInstallments || 2))
+    : 1;
 
   return {
     id: payload.id || `PED-${Date.now()}`,
@@ -759,11 +771,12 @@ async function normalizeOrder(payload) {
       address: String(customer.address || "").trim()
     },
     deliveryMethod: String(payload.deliveryMethod || "Entrega"),
-    paymentMethod: String(payload.paymentMethod || "Pix"),
+    paymentMethod,
+    installments,
     status: "Novo pedido",
     subtotal,
     shipping,
-    total: Number((subtotal + shipping).toFixed(2)),
+    total,
     items
   };
 }
@@ -773,6 +786,9 @@ function validateOrder(order) {
   if (!order.customer.phone) return "Telefone do cliente e obrigatorio.";
   if (!order.items.length) return "O carrinho esta vazio.";
   if (order.deliveryMethod === "Entrega" && !order.customer.address) return "Endereco e obrigatorio para entrega.";
+  if (order.paymentMethod === "Cartao" && order.installments > 1 && order.total < MIN_INSTALLMENT_TOTAL) {
+    return "Parcelamento disponivel apenas para compras acima de R$ 200,00.";
+  }
   return "";
 }
 
